@@ -1,0 +1,81 @@
+\relax 
+\providecommand \babel@aux [2]{\global \let \babel@toc \@gobbletwo }
+\@nameuse{bbl@beforestart}
+\catcode `"\active 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{bloom1970}
+\citation{dpi2003}
+\citation{fan2000}
+\citation{fan2000}
+\citation{broder2004}
+\babel@aux{vietnamese}{}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Giới thiệu}{1}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Cơ sở lý thuyết}{1}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Bloom Filter (Bloom, 1970)}{1}{subsection.2.1}\protected@file@percent }
+\citation{fan2000}
+\citation{broder2004}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Counting Bloom Filter (Fan \emph  {et al.}, 2000)}{2}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Công thức xác suất}{2}{subsection.2.3}\protected@file@percent }
+\newlabel{sec:formulas}{{2.3}{2}{Công thức xác suất}{subsection.2.3}{}}
+\newlabel{eq:fpr}{{2}{2}{Công thức xác suất}{equation.2}{}}
+\newlabel{eq:kopt}{{3}{2}{Công thức xác suất}{equation.3}{}}
+\@writefile{toc}{\contentsline {paragraph}{Tràn counter và vì sao 4 bit là đủ.}{2}{section*.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Hai hệ quả cho việc so sánh.}{2}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Mã giả}{3}{section.3}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces Bloom Filter: Insert và Query}}{3}{algorithm.1}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {2}{\ignorespaces Counting Bloom Filter: Insert, Query, Delete (counter bão hòa)}}{3}{algorithm.2}\protected@file@percent }
+\citation{kirsch2008}
+\@writefile{toc}{\contentsline {section}{\numberline {4}So sánh định tính}{4}{section.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces So sánh Bloom Filter và Counting Bloom Filter}}{4}{table.1}\protected@file@percent }
+\newlabel{tab:qualitative}{{1}{4}{So sánh Bloom Filter và Counting Bloom Filter}{table.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Phương pháp thực nghiệm}{4}{section.5}\protected@file@percent }
+\newlabel{sec:method}{{5}{4}{Phương pháp thực nghiệm}{section.5}{}}
+\@writefile{toc}{\contentsline {paragraph}{Môi trường.}{4}{section*.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Cài đặt.}{4}{section*.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Dữ liệu và tham số.}{4}{section*.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Bốn thực nghiệm.}{4}{section*.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Giả thuyết.}{4}{section*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Kết quả và thảo luận}{5}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}FPR thực nghiệm bám sát lý thuyết (H1, H4)}{5}{subsection.6.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces E1 --- FPR lý thuyết vs.\ thực nghiệm ($n=100\,000{}$, $k=\mathrm  {round}((m/n)\ln 2)$)}}{5}{table.2}\protected@file@percent }
+\newlabel{tab:fpr}{{2}{5}{E1 --- FPR lý thuyết vs.\ thực nghiệm ($n=\NKeys {}$, $k=\mathrm {round}((m/n)\ln 2)$)}{table.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces FPR theo $m/n$ (trục tung log). Điểm thực nghiệm của BF và CBF trùng khít lên đường lý thuyết $p=(1-e^{-kn/m})^k$ tại $k=k^*$.}}{5}{figure.1}\protected@file@percent }
+\newlabel{fig:fpr_mn}{{1}{5}{FPR theo $m/n$ (trục tung log). Điểm thực nghiệm của BF và CBF trùng khít lên đường lý thuyết $p=(1-e^{-kn/m})^k$ tại $k=k^*$}{figure.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Số hàm băm tối ưu (H4)}{5}{subsection.6.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces FPR theo số hàm băm $k$ tại $m/n=10$: cực tiểu tại $k^*=(m/n)\ln 2\approx 7$.}}{6}{figure.2}\protected@file@percent }
+\newlabel{fig:fpr_k}{{2}{6}{FPR theo số hàm băm $k$ tại $m/n=10$: cực tiểu tại $k^*=(m/n)\ln 2\approx 7$}{figure.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.3}Bộ nhớ: CBF trả giá $4\times $ (H2)}{6}{subsection.6.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces E1 --- Bộ nhớ cấp phát thực tế theo $m/n$ ($n=100\,000{}$)}}{6}{table.3}\protected@file@percent }
+\newlabel{tab:memory}{{3}{6}{E1 --- Bộ nhớ cấp phát thực tế theo $m/n$ ($n=\NKeys {}$)}{table.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Thông lượng (H3)}{6}{subsection.6.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces E1 --- Thông lượng (nghìn thao tác/giây; CBF4 = CBF 4-bit)}}{6}{table.4}\protected@file@percent }
+\newlabel{tab:throughput}{{4}{6}{E1 --- Thông lượng (nghìn thao tác/giây; CBF4 = CBF 4-bit)}{table.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Thông lượng insert, query (miss) và delete theo $m/n$.}}{7}{figure.3}\protected@file@percent }
+\newlabel{fig:throughput}{{3}{7}{Thông lượng insert, query (miss) và delete theo $m/n$}{figure.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.5}Cùng ngân sách bộ nhớ: BF thắng áp đảo}{7}{subsection.6.5}\protected@file@percent }
+\newlabel{sec:equalbudget}{{6.5}{7}{Cùng ngân sách bộ nhớ: BF thắng áp đảo}{subsection.6.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces E3 --- Cùng ngân sách 125\,000{} byte, $n=100\,000{}$, $k$ tối ưu cho từng cấu trúc}}{7}{table.5}\protected@file@percent }
+\newlabel{tab:equalbudget}{{5}{7}{E3 --- Cùng ngân sách \BudgetBytes {} byte, $n=\NKeys {}$, $k$ tối ưu cho từng cấu trúc}{table.5}{}}
+\citation{putze2010}
+\citation{cuckoo2014}
+\citation{bonomi2006}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces FPR (thang log) khi cả ba cấu trúc dùng cùng một lượng byte.}}{8}{figure.4}\protected@file@percent }
+\newlabel{fig:equalbudget}{{4}{8}{FPR (thang log) khi cả ba cấu trúc dùng cùng một lượng byte}{figure.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.6}False negative của CBF khi xóa}{8}{subsection.6.6}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces E4 --- Xóa các khóa bị báo nhầm ``có'' gây false negative trong CBF}}{8}{table.6}\protected@file@percent }
+\newlabel{tab:falseneg}{{6}{8}{E4 --- Xóa các khóa bị báo nhầm ``có'' gây false negative trong CBF}{table.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Các biến thể liên quan}{8}{section.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {8}Khuyến nghị lựa chọn}{8}{section.8}\protected@file@percent }
+\bibcite{bloom1970}{1}
+\bibcite{fan2000}{2}
+\bibcite{broder2004}{3}
+\bibcite{putze2010}{4}
+\bibcite{kirsch2008}{5}
+\bibcite{bonomi2006}{6}
+\bibcite{cuckoo2014}{7}
+\bibcite{dpi2003}{8}
+\@writefile{toc}{\contentsline {section}{\numberline {9}Kết luận}{9}{section.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Hạn chế.}{9}{section*.8}\protected@file@percent }
+\gdef \@abspage@last{9}
