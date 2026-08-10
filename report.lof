@@ -1,0 +1,9 @@
+\babel@toc {vietnamese}{}\relax 
+\contentsline {figure}{\numberline {1}{\ignorespaces FPR theo $m/n$ (trục tung log). BF và CBF trùng nhau; thanh sai số là KTC Wilson 95\%, đường liền là $p=(1-e^{-kn/m})^k$ tại $k=k^*$.}}{10}{figure.1}%
+\contentsline {figure}{\numberline {2}{\ignorespaces FPR theo số hàm băm $k$ tại $m/n=10$: cực tiểu tại $k^*=(m/n)\ln 2\approx 7$.}}{11}{figure.2}%
+\contentsline {figure}{\numberline {3}{\ignorespaces Median throughput insert, query (miss) và delete theo $m/n$; dải tô là IQR của 5{} lượt đo.}}{12}{figure.3}%
+\contentsline {figure}{\numberline {4}{\ignorespaces FPR (thang log) khi cả ba mảng backing dùng cùng payload byte.}}{13}{figure.4}%
+\contentsline {figure}{\numberline {5}{\ignorespaces FPR (thang log) của năm cấu trúc ở cùng mức ${\approx }10$ bit/khóa; nhãn dưới mỗi cột cho biết cấu trúc có hỗ trợ xóa hay không.}}{15}{figure.5}%
+\contentsline {figure}{\numberline {6}{\ignorespaces Blocked Bloom Filter: thay vì rải $k$ bit khắp mảng (trên), toàn bộ $k$ bit của một khóa nằm gọn trong block 512~bit do $h_0$ chọn (dưới), nên mỗi truy vấn tốn tối đa một cache miss.}}{15}{figure.6}%
+\contentsline {figure}{\numberline {7}{\ignorespaces Cuckoo Filter: fingerprint A7 của khóa $x$ có hai bucket ứng viên $i_1=2$ và $i_2=6$; nó được đặt vào chỗ trống của bucket~2. Khi cả hai bucket đầy, một fingerprint bị đuổi sang bucket thay thế của chính nó (tính bằng XOR), lặp tối đa \texttt {MAX\_KICKS} lần.}}{16}{figure.7}%
+\contentsline {figure}{\numberline {8}{\ignorespaces d-left CBF với $d=3$: khóa $x$ băm ra một bucket ứng viên trong mỗi bảng con (viền cam, nhãn $h_i(x)$); mỗi ô vuông nhỏ là một mục đã lưu, nên tải ba ứng viên là $2/1/1$ và bucket của bảng con~2 được chọn (viền xanh). Phần phóng to cho thấy mỗi mục gồm một fingerprint kèm counter nhỏ để hỗ trợ đếm bội và xóa.}}{17}{figure.8}%

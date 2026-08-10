@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.8.10)  10 AUG 2026 11:38
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.8.10)  10 AUG 2026 16:20
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -625,6 +625,14 @@ File: pgfmodulematrix.code.tex 2026-08-01 v3.1.12 (3.1.12)
 File: tikzlibrarytopaths.code.tex 2026-08-01 v3.1.12 (3.1.12)
 ))) (/home/khanhtd/.TinyTeX/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrarycalc.code.tex
 File: tikzlibrarycalc.code.tex 2026-08-01 v3.1.12 (3.1.12)
+) (/home/khanhtd/.TinyTeX/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrarypositioning.code.tex
+File: tikzlibrarypositioning.code.tex 2026-08-01 v3.1.12 (3.1.12)
+) (/home/khanhtd/.TinyTeX/texmf-dist/tex/generic/pgf/libraries/pgflibraryarrows.meta.code.tex
+File: pgflibraryarrows.meta.code.tex 2026-08-01 v3.1.12 (3.1.12)
+\pgfarrowinset=\dimen284
+\pgfarrowlength=\dimen285
+\pgfarrowwidth=\dimen286
+\pgfarrowlinewidth=\dimen287
 ) (/home/khanhtd/.TinyTeX/texmf-dist/tex/latex/hyperref/hyperref.sty
 Package: hyperref 2026-06-17 v7.01r Hypertext links for LaTeX
  (/home/khanhtd/.TinyTeX/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty
@@ -661,7 +669,7 @@ Package: etoolbox 2025/10/02 v2.5m e-TeX tools for LaTeX (JAW)
 ) (/home/khanhtd/.TinyTeX/texmf-dist/tex/generic/stringenc/stringenc.sty
 Package: stringenc 2019/11/29 v1.12 Convert strings between diff. encodings (HO)
 )
-\@linkdim=\dimen284
+\@linkdim=\dimen288
 \Hy@linkcounter=\count334
 \Hy@pagecounter=\count335
  (/home/khanhtd/.TinyTeX/texmf-dist/tex/latex/hyperref/pd1enc.def
@@ -691,15 +699,15 @@ Package hyperref Info: Bookmarks ON on input line 4466.
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
 LaTeX Info: Redefining \url on input line 4805.
-\XeTeXLinkMargin=\dimen285
+\XeTeXLinkMargin=\dimen289
  (/home/khanhtd/.TinyTeX/texmf-dist/tex/generic/bitset/bitset.sty
 Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
  (/home/khanhtd/.TinyTeX/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty
 Package: bigintcalc 2019/12/15 v1.5 Expandable calculations on big integers (HO)
 ))
 \Fld@menulength=\count338
-\Field@Width=\dimen286
-\Fld@charsize=\dimen287
+\Field@Width=\dimen290
+\Fld@charsize=\dimen291
 Package hyperref Info: Hyper figures OFF on input line 6091.
 Package hyperref Info: Link nesting OFF on input line 6096.
 Package hyperref Info: Hyper index ON on input line 6099.
@@ -732,14 +740,14 @@ Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
 \Gm@cnth=\count344
 \Gm@cntv=\count345
 \c@Gm@tempcnt=\count346
-\Gm@bindingoffset=\dimen288
-\Gm@wd@mp=\dimen289
-\Gm@odd@mp=\dimen290
-\Gm@even@mp=\dimen291
-\Gm@layoutwidth=\dimen292
-\Gm@layoutheight=\dimen293
-\Gm@layouthoffset=\dimen294
-\Gm@layoutvoffset=\dimen295
+\Gm@bindingoffset=\dimen292
+\Gm@wd@mp=\dimen293
+\Gm@odd@mp=\dimen294
+\Gm@even@mp=\dimen295
+\Gm@layoutwidth=\dimen296
+\Gm@layoutheight=\dimen297
+\Gm@layouthoffset=\dimen298
+\Gm@layoutvoffset=\dimen299
 \Gm@dimlist=\toks41
 ) (./tab/numbers.tex) (/home/khanhtd/.TinyTeX/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 File: l3backend-pdftex.def 2026-02-18 L3 backend support: PDF output (pdfTeX)
@@ -750,33 +758,33 @@ Package babel Info: 'vietnamese' activates 'vietnamese' shorthands.
 )
 \openout1 = `report.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 37.
-LaTeX Font Info:    ... okay on input line 37.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 37.
-LaTeX Font Info:    ... okay on input line 37.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 37.
-LaTeX Font Info:    ... okay on input line 37.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 37.
-LaTeX Font Info:    ... okay on input line 37.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 37.
-LaTeX Font Info:    ... okay on input line 37.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 37.
-LaTeX Font Info:    ... okay on input line 37.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 37.
-LaTeX Font Info:    ... okay on input line 37.
-LaTeX Font Info:    Checking defaults for T5/cmr/m/n on input line 37.
-LaTeX Font Info:    ... okay on input line 37.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 37.
-LaTeX Font Info:    ... okay on input line 37.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 37.
-LaTeX Font Info:    ... okay on input line 37.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 40.
+LaTeX Font Info:    ... okay on input line 40.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 40.
+LaTeX Font Info:    ... okay on input line 40.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 40.
+LaTeX Font Info:    ... okay on input line 40.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 40.
+LaTeX Font Info:    ... okay on input line 40.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 40.
+LaTeX Font Info:    ... okay on input line 40.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 40.
+LaTeX Font Info:    ... okay on input line 40.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 40.
+LaTeX Font Info:    ... okay on input line 40.
+LaTeX Font Info:    Checking defaults for T5/cmr/m/n on input line 40.
+LaTeX Font Info:    ... okay on input line 40.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 40.
+LaTeX Font Info:    ... okay on input line 40.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 40.
+LaTeX Font Info:    ... okay on input line 40.
  (/home/khanhtd/.TinyTeX/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
 Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 485.
  (/home/khanhtd/.TinyTeX/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 ))
-Package hyperref Info: Link coloring OFF on input line 37.
+Package hyperref Info: Link coloring OFF on input line 40.
  (./report.out) (./report.out)
 \@outlinefile=\write4
 \openout4 = `report.out'.
@@ -817,70 +825,89 @@ Package hyperref Info: Link coloring OFF on input line 37.
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
 Package babel Info: Main language set to 'vietnamese'.
-LaTeX Font Info:    Calculating math sizes for size <14> on input line 55.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 55.
+LaTeX Font Info:    Calculating math sizes for size <14> on input line 58.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 58.
 (/home/khanhtd/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 55.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 58.
  (/home/khanhtd/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-<logo-PTIT.jpg, id=79, 301.125pt x 372.64218pt>
+<logo-PTIT.jpg, id=119, 301.125pt x 372.64218pt>
 File: logo-PTIT.jpg Graphic file (type jpg)
 <use logo-PTIT.jpg>
-Package pdftex.def Info: logo-PTIT.jpg  used on input line 59.
+Package pdftex.def Info: logo-PTIT.jpg  used on input line 62.
 (pdftex.def)             Requested size: 75.28105pt x 93.16031pt.
-LaTeX Font Info:    Calculating math sizes for size <17> on input line 80.
+LaTeX Font Info:    Calculating math sizes for size <17> on input line 83.
 
 
 LaTeX Font Warning: Font shape `OT1/cmr/m/n' in size <8.5> not available
-(Font)              size <8> substituted on input line 80.
+(Font)              size <8> substituted on input line 83.
 
 
 LaTeX Font Warning: Font shape `OML/cmm/m/it' in size <8.5> not available
-(Font)              size <8> substituted on input line 80.
+(Font)              size <8> substituted on input line 83.
 
 
 LaTeX Font Warning: Font shape `OMS/cmsy/m/n' in size <8.5> not available
-(Font)              size <8> substituted on input line 80.
+(Font)              size <8> substituted on input line 83.
 
 [1
 
-{/home/khanhtd/.TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map} <./logo-PTIT.jpg>]
+{/home/khanhtd/.TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map} <./logo-PTIT.jpg>] (./report.toc)
+\tf@toc=\write5
+\openout5 = `report.toc'.
+
+ (./report.lof
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.158 \end{equation}
-                     [1]
-Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on input line 202.
-LaTeX Font Info:    Trying to load font information for T5+cmtt on input line 209.
+l.8 ...\texttt {MAX\_KICKS} lần.}}{16}{figure.7}
+                                                  % [1]
+LaTeX Font Info:    Trying to load font information for T5+cmtt on input line 8.
  (/home/khanhtd/.TinyTeX/texmf-dist/tex/latex/vntex/t5cmtt.fd
 File: t5cmtt.fd 1999/05/25 v2.5h Standard LaTeX font definitions
-) [2] [3] (./tab/fpr.tex) [4]
-<fig/fpr_vs_mn.png, id=153, 442.2924pt x 281.1303pt>
+))
+\tf@lof=\write6
+\openout6 = `report.lof'.
+
+ (./report.lot)
+\tf@lot=\write7
+\openout7 = `report.lot'.
+
+ [2] [3] [4] [5]
+Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on input line 297.
+ [6] [7] [8] (./tab/fpr.tex) [9]
+<fig/fpr_vs_mn.png, id=311, 442.2924pt x 281.1303pt>
 File: fig/fpr_vs_mn.png Graphic file (type png)
 <use fig/fpr_vs_mn.png>
-Package pdftex.def Info: fig/fpr_vs_mn.png  used on input line 341.
+Package pdftex.def Info: fig/fpr_vs_mn.png  used on input line 500.
 (pdftex.def)             Requested size: 327.7763pt x 208.34201pt.
-<fig/fpr_vs_k.png, id=157, 441.5697pt x 281.1303pt>
+<fig/fpr_vs_k.png, id=315, 441.5697pt x 281.1303pt>
 File: fig/fpr_vs_k.png Graphic file (type png)
 <use fig/fpr_vs_k.png>
-Package pdftex.def Info: fig/fpr_vs_k.png  used on input line 355.
+Package pdftex.def Info: fig/fpr_vs_k.png  used on input line 514.
 (pdftex.def)             Requested size: 327.7763pt x 208.6852pt.
- [5 <./fig/fpr_vs_mn.png>] (./tab/memory.tex) (./tab/throughput.tex) [6 <./fig/fpr_vs_k.png>]
-<fig/throughput.png, id=178, 678.25395pt x 289.44135pt>
+ [10 <./fig/fpr_vs_mn.png>] (./tab/memory.tex) (./tab/throughput.tex) [11 <./fig/fpr_vs_k.png>]
+<fig/throughput.png, id=332, 678.25395pt x 289.44135pt>
 File: fig/throughput.png Graphic file (type png)
 <use fig/throughput.png>
-Package pdftex.def Info: fig/throughput.png  used on input line 399.
+Package pdftex.def Info: fig/throughput.png  used on input line 568.
 (pdftex.def)             Requested size: 455.24411pt x 194.27359pt.
- (./tab/equal_budget.tex)
-<fig/equal_budget.png, id=181, 407.96416pt x 268.48305pt>
+ (./tab/equal_budget.tex) [12 <./fig/throughput.png>]
+<fig/equal_budget.png, id=343, 407.96416pt x 268.48305pt>
 File: fig/equal_budget.png Graphic file (type png)
 <use fig/equal_budget.png>
-Package pdftex.def Info: fig/equal_budget.png  used on input line 425.
+Package pdftex.def Info: fig/equal_budget.png  used on input line 600.
 (pdftex.def)             Requested size: 282.24911pt x 185.75739pt.
- [7 <./fig/throughput.png>] (./tab/false_neg.tex) [8 <./fig/equal_budget.png>] [9] [10] (./report.aux)
+ (./tab/false_neg.tex) [13 <./fig/equal_budget.png>] (./tab/variants.tex)
+<fig/variants.png, id=354, 452.77155pt x 290.88675pt>
+File: fig/variants.png Graphic file (type png)
+<use fig/variants.png>
+Package pdftex.def Info: fig/variants.png  used on input line 672.
+(pdftex.def)             Requested size: 364.19667pt x 233.988pt.
+ [14] [15 <./fig/variants.png>] [16] [17] [18] [19] (./report.aux)
  ***********
 LaTeX2e <2026-06-01>
 L3 programming layer <2026-06-18>
@@ -891,21 +918,21 @@ LaTeX Font Warning: Size substitutions with differences
 (Font)              up to 0.5pt have occurred.
 
 Package rerunfilecheck Info: File `report.out' has not changed.
-(rerunfilecheck)             Checksum: AA3BDEC3EC78F467EE168C1347B36653;3424.
+(rerunfilecheck)             Checksum: E98881A5997E01EF5BE2E76EF3FD81B2;5575.
  ) 
 Here is how much of TeX's memory you used:
- 23494 strings out of 469153
- 430732 string characters out of 5459915
- 834447 words of memory out of 5000000
- 52032 multiletter control sequences out of 15000+600000
- 658038 words of font info for 112 fonts, out of 8000000 for 9000
+ 24748 strings out of 469153
+ 454481 string characters out of 5459915
+ 879933 words of memory out of 5000000
+ 53231 multiletter control sequences out of 15000+600000
+ 661528 words of font info for 120 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 92i,11n,94p,410b,586s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/vntex/vnr/vnbx10.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/vntex/vnr/vnbx12.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/vntex/vnr/vnbxti10.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/vntex/vnr/vnr10.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/vntex/vnr/vnr12.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/vntex/vnr/vnr9.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/vntex/vnr/vnti10.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/vntex/vnr/vntt10.pfb>
-Output written on report.pdf (11 pages, 543566 bytes).
+ 92i,11n,94p,536b,917s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/vntex/vnr/vnbx10.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/vntex/vnr/vnbx12.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/vntex/vnr/vnbxti10.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/vntex/vnr/vnr10.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/vntex/vnr/vnr12.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/vntex/vnr/vnr8.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/vntex/vnr/vnr9.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/vntex/vnr/vnti10.pfb></home/khanhtd/.TinyTeX/texmf-dist/fonts/type1/vntex/vnr/vntt10.pfb>
+Output written on report.pdf (20 pages, 702962 bytes).
 PDF statistics:
- 313 PDF objects out of 1000 (max. 8388607)
- 252 compressed objects within 3 object streams
- 67 named destinations out of 1000 (max. 500000)
- 182 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 539 PDF objects out of 1000 (max. 8388607)
+ 453 compressed objects within 5 object streams
+ 99 named destinations out of 1000 (max. 500000)
+ 267 words of extra memory for PDF output out of 10000 (max. 10000000)
 

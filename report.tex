@@ -23,7 +23,10 @@
 \algrenewcommand\textproc[1]{\textbf{#1}}
 \usepackage{xcolor}
 \usepackage{tikz}
-\usetikzlibrary{calc}
+\usetikzlibrary{calc,positioning,arrows.meta}
+\definecolor{vizblue}{HTML}{2A78D6}
+\definecolor{vizorange}{HTML}{EB6834}
+\definecolor{vizaqua}{HTML}{1BAF7A}
 \usepackage[hidelinks,unicode]{hyperref}
 \usepackage{geometry}
 \geometry{margin=2.5cm}
@@ -85,6 +88,41 @@
     \vspace{0.5cm}
 \end{titlepage}
 
+\tableofcontents
+\listoffigures
+\listoftables
+\newpage
+
+\section*{Danh mục ký hiệu và chữ viết tắt}
+\addcontentsline{toc}{section}{Danh mục ký hiệu và chữ viết tắt}
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{0.68\textwidth}@{}}
+\toprule
+Ký hiệu / viết tắt & Ý nghĩa \\
+\midrule
+$m$ & số ô của bộ lọc (bit với BF; counter với CBF) \\
+$n$ & số phần tử đã chèn vào bộ lọc \\
+$n'$ & số khóa vắng mặt dùng để đo FPR \\
+$k$ & số hàm băm; $k^{*}=(m/n)\ln 2$ là giá trị tối ưu \\
+$p$ & xác suất dương tính giả \\
+$b$ & độ rộng một counter của CBF, tính bằng bit (mặc định $b=4$) \\
+$C[i]$ & giá trị counter thứ $i$ của CBF \\
+$\lambda$ & kỳ vọng số lượt băm vào một ô, $\lambda=kn/m$ \\
+BF & Bloom Filter \\
+CBF & Counting Bloom Filter (4-bit/8-bit chỉ độ rộng counter) \\
+FPR & false positive rate (tỉ lệ dương tính giả) \\
+KTC & khoảng tin cậy (trong báo cáo: khoảng Wilson, mức 95\%) \\
+IQR & interquartile range (khoảng tứ phân vị của các lượt đo) \\
+DPI / IDS & deep packet inspection / intrusion detection system \\
+LSM-tree, SSTable & cây log-structured merge; tệp bảng sắp xếp bất biến \\
+payload & phần dữ liệu chính của mảng lưu trữ, không tính overhead \\
+contract của delete & tiền điều kiện: chỉ xóa khóa chắc chắn đã chèn \\
+\bottomrule
+\end{tabular}
+\end{center}
+\newpage
+
 \begin{abstract}
 Báo cáo so sánh Bloom Filter (BF, Bloom 1970) và Counting Bloom Filter (CBF,
 Fan \emph{et al.} 2000) cho bài toán lọc dữ liệu tốc độ cao (lọc gói tin,
@@ -101,7 +139,10 @@ sách byte, FPR của CBF (\EqFprCBFFour{}) cao hơn BF (\EqFprBF{}) khoảng
 xóa an toàn khi bên gọi (caller) chỉ xóa khóa chắc chắn đã chèn: xóa đúng
 \FnValidDeleted{} khóa không làm mất khóa thật nào còn lại, trong khi stress
 test trên một bộ lọc riêng chứa đủ $n$ khóa, cố ý xóa các false positive,
-tạo ra \FnCount{} false negative (\FnRate{} của $n$). Kết luận: dùng BF cho tập gần như tĩnh; dùng CBF khi cần xóa động
+tạo ra \FnCount{} false negative (\FnRate{} của $n$); (iv)~ở cùng mức
+${\approx}10$ bit/khóa, trong các cấu trúc hỗ trợ xóa, Cuckoo Filter đạt
+FPR \CkFpr{}, thấp hơn CBF 4-bit hơn một bậc độ lớn. Kết luận: dùng BF
+cho tập gần như tĩnh; dùng CBF khi cần xóa động
 và hệ thống bảo đảm được contract của delete; khi cần xóa với FPR mục tiêu
 $<3\%$, Cuckoo Filter là lựa chọn đáng cân nhắc hơn.
 \end{abstract}
@@ -171,6 +212,60 @@ m=-\frac{n\ln p}{(\ln 2)^{2}}\;\Longleftrightarrow\;
 \end{equation}
 Tại $k^{*}$: $p=2^{-(m/n)\ln 2}\approx 0.6185^{\,m/n}$. Quy tắc thực dụng:
 $m/n=8$ cho FPR $\approx 2\%$; $m/n=10$ cho FPR $<1\%$.
+
+\paragraph{Dẫn xuất công thức~(\ref{eq:fpr}).}
+Mỗi lần băm chọn một trong $m$ ô với xác suất đều nhau, nên một ô cụ thể
+\emph{không} bị chọn với xác suất $1-1/m$. Chèn $n$ phần tử với $k$ hàm băm
+tạo ra $kn$ lần băm độc lập, do đó một bit cụ thể vẫn bằng $0$ với xác suất
+$(1-1/m)^{kn}$; dùng giới hạn kinh điển $(1-1/m)^{m}\to e^{-1}$ khi $m$ lớn
+ta được xấp xỉ $e^{-kn/m}$ trong~(1). Một khóa lạ bị báo nhầm ``có'' khi cả
+$k$ vị trí của nó đều mang bit 1; xấp xỉ coi $k$ bit này độc lập cho
+ra~(\ref{eq:fpr}). Cần lưu ý hai điểm: (i)~các bit không hoàn toàn độc lập,
+nên~(\ref{eq:fpr}) chỉ là xấp xỉ và trên thực tế là \emph{cận dưới} của FPR
+thật; độ chệch thấy rõ nhất khi bộ lọc dày đặc ($m/n$ nhỏ), điều mà thực
+nghiệm ở Mục~\ref{sec:e1result} quan sát được trực tiếp; (ii)~phân tích giả
+định hàm băm lý tưởng, phân bố đều.
+
+\paragraph{Dẫn xuất số hàm băm tối ưu.}
+Lấy logarit của~(\ref{eq:fpr}): $\ln p = k\ln\!\left(1-e^{-kn/m}\right)$.
+Đặt $t=e^{-kn/m}$ (tỉ lệ bit 0 kỳ vọng), khi đó $k=-(m/n)\ln t$ và
+$\ln p = -(m/n)\ln t\,\ln(1-t)$. Biểu thức $\ln t\,\ln(1-t)$ đối xứng qua
+$t=1/2$ và đạt cực đại tại đó, nên $p$ đạt cực tiểu khi $t=1/2$: nghĩa là
+bộ lọc tối ưu có \emph{một nửa số bit bằng 0}, tức trạng thái entropy cực
+đại, khi mỗi bit mang lượng thông tin lớn nhất. Thay $t=1/2$ vào $k=-(m/n)\ln t$
+được $k^{*}=(m/n)\ln 2$, và $p=2^{-k^{*}}$ cho vế còn lại
+của~(\ref{eq:kopt}). Bảng~\ref{tab:theory} liệt kê vài giá trị tiêu biểu;
+sáu dòng đầu chính là các cấu hình được kiểm chứng thực nghiệm ở
+Mục~\ref{sec:e1result}.
+
+\begin{table}[H]\centering
+\caption{Giá trị lý thuyết: số hàm băm tối ưu và FPR theo tỉ lệ $m/n$}
+\label{tab:theory}
+\begin{tabular}{@{}rrr@{}}
+\toprule
+$m/n$ & $k^{*}=\mathrm{round}((m/n)\ln 2)$ & FPR tại $k^{*}$\\
+\midrule
+4  & 3  & 14.689\% \\
+6  & 4  & 5.606\% \\
+8  & 6  & 2.158\% \\
+10 & 7  & 0.819\% \\
+12 & 8  & 0.314\% \\
+16 & 11 & 0.046\% \\
+20 & 14 & 0.007\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Từ hai hàm băm đến $k$ vị trí.}
+Tính $k$ hàm băm độc lập cho mỗi khóa là tốn kém. Sơ đồ double hashing của
+Kirsch--Mitzenmacher~\cite{kirsch2008} chỉ cần hai hàm băm $h_1,h_2$ rồi
+sinh $k$ vị trí bằng $g_i(x)=(h_1(x)+i\,h_2(x)) \bmod m$; phân tích chứng
+minh FPR tiệm cận không đổi so với $k$ hàm độc lập. Một chi tiết cài đặt
+quan trọng: nếu $\gcd(h_2,m)>1$ (trường hợp xấu nhất là $h_2\equiv 0$), dãy
+$g_i$ suy biến và chỉ phủ một phần mảng; buộc $h_2$ nhận giá trị lẻ loại trừ
+rủi ro này với mọi $m$ chẵn (kể cả lũy thừa của 2), tương ứng với phép
+\texttt{h2 |= 1} trong bản cài đặt của chúng tôi
+(notebook \texttt{thuc\_nghiem.ipynb}).
 
 \paragraph{Tràn counter và vì sao 4 bit là đủ.}
 Số phần tử băm vào một counter tuân theo phân bố nhị thức
@@ -266,6 +361,57 @@ Hợp phần cứng     & Rất tốt (SRAM on-chip) & Tốn SRAM hơn (thườn
 \end{tabular}
 \end{table}
 
+\section{Ứng dụng trong lọc dữ liệu tốc độ cao}
+\label{sec:applications}
+Trước khi vào thực nghiệm, mục này đối chiếu đặc tính BF/CBF với bốn miền
+ứng dụng tiêu biểu; mỗi miền minh họa một cách phân vai khác nhau giữa cấu
+trúc gọn nhẹ không hỗ trợ xóa (BF) và cấu trúc hỗ trợ xóa với chi phí bộ
+nhớ cao hơn (CBF).
+
+\subsection{Deep packet inspection và IDS}
+Dharmapurikar \emph{et al.}~\cite{dpi2003} đặt các Bloom filter \emph{song
+song} trong SRAM on-chip của FPGA, mỗi bộ lọc phụ trách một độ dài chữ ký;
+tại mỗi vị trí byte của luồng dữ liệu, mọi độ dài được kiểm tra đồng thời.
+Chỉ khi một filter báo ``có thể có'', gói tin mới được chuyển sang khối so
+khớp chính xác; nhờ đó BF đóng vai trò \emph{lọc thô}, loại bỏ phần lớn lưu lượng
+vô hại ở tốc độ đường truyền. Nguyên mẫu trên Xilinx Virtex~2000E hỗ trợ
+khoảng 10\,000 chữ ký với thông lượng ${\sim}600$~Mbps; các thiết kế phần
+cứng kế tiếp cùng hướng nhắm tới hàng chục Gbps. Tập chữ ký IDS ít thay đổi
+nên BF thuần phù hợp; khi cần cập nhật, mô hình lai thường dùng là CBF trong
+phần mềm điều khiển (nơi giữ nguồn dữ liệu chuẩn, nên delete tuân thủ
+contract như E4 đòi hỏi) và BF phần cứng được đồng bộ lại từ đó.
+
+\subsection{Lọc truy vấn trong cơ sở dữ liệu LSM-tree}
+Trong RocksDB, mỗi tệp SSTable (bất biến sau khi ghi) mang một Bloom filter
+riêng; truy vấn điểm kiểm tra filter trước, câu trả lời ``chắc chắn không''
+cho phép bỏ qua tệp mà không tốn I/O đĩa~\cite{rocksdbBloom}, qua đó giảm trực
+tiếp read amplification. Đáng chú ý, tính bất biến của SSTable khiến nhu cầu
+xóa khỏi filter \emph{không tồn tại}: compaction tạo tệp mới kèm filter mới,
+đúng chiến lược ``rebuild thay vì delete'' mà Mục~\ref{sec:recommend}
+khuyến nghị. Cấu hình phổ biến khoảng 10~bit/khóa cho FPR quanh 1\%, khớp
+Bảng~\ref{tab:theory}; bản full filter hiện đại còn gói toàn bộ probe vào
+một cache line (Mục~\ref{sec:variants}).
+
+\subsection{Web cache hợp tác}
+Giao thức Summary Cache~\cite{fan2000}, nơi CBF ra đời, cho mỗi proxy
+giữ \emph{tóm tắt} thư mục cache của các proxy láng giềng dưới dạng BF, và
+chỉ chuyển tiếp yêu cầu khi tóm tắt báo ``có thể có''. Vì nội dung cache
+thay đổi liên tục, mỗi proxy duy trì một CBF \emph{cục bộ} cho thư mục của
+chính mình (đủ thông tin để xóa an toàn) và định kỳ phát snapshot dạng BF
+0/1 cho láng giềng: CBF đứng ở nơi có nguồn dữ liệu chuẩn, BF đứng ở nơi chỉ
+cần tra cứu. Fan \emph{et al.} báo cáo giảm số thông điệp liên proxy
+25--60 lần và băng thông hơn 50\% so với giao thức ICP truyền thống, với
+load factor $m/n$ từ 8 đến 16~\cite{fan2000}. Cache Digest của Squid dùng
+cùng nguyên lý.
+
+\subsection{Khử trùng lặp dữ liệu}
+Hệ thống sao lưu/khử trùng lặp băm mỗi khối dữ liệu thành fingerprint và
+giữ chỉ mục đầy đủ trên đĩa; một BF trong RAM trả lời ``chắc chắn chưa
+gặp'' giúp ghi khối mới không cần tra chỉ mục~\cite{broder2004}. False
+positive ở đây chỉ gây một lần tra cứu thừa, không ảnh hưởng đúng đắn. Khi
+có thu hồi khối (garbage collection), tập fingerprint co lại; khi đó hoặc dùng
+CBF, hoặc đơn giản rebuild filter theo chu kỳ thu hồi.
+
 \section{Phương pháp thực nghiệm}
 \label{sec:method}
 \paragraph{Môi trường.} Python \EnvPython{}, CPU \EnvCPU{}; các gói
@@ -295,7 +441,7 @@ FPR được báo cùng khoảng tin cậy (KTC) Wilson 95\%. Các phép đo thr
 insert/delete dùng filter mới ở mỗi lượt để bảo đảm trạng thái đầu vào giống
 nhau.
 
-\paragraph{Bốn thực nghiệm.}
+\paragraph{Năm thực nghiệm.}
 \begin{itemize}
   \item[\textbf{E1}] FPR thực nghiệm vs.\ lý thuyết (kèm KTC 95\%) và
         median/IQR throughput của các thao tác insert, query, delete
@@ -306,6 +452,9 @@ nhau.
         BF (1 bit/ô), CBF 4-bit và CBF 8-bit.
   \item[\textbf{E4}] Kiểm tra xóa đúng không làm mất khóa thật còn lại, sau
         đó stress test việc xóa khóa vắng mặt bị CBF báo nhầm ``có''.
+  \item[\textbf{E5}] Đối chiếu với hai biến thể ở cùng mức ${\approx}10$
+        bit/khóa: Blocked Bloom Filter (đánh đổi FPR lấy tính cục bộ cache)
+        và Cuckoo Filter (fingerprint 8~bit, hỗ trợ xóa).
 \end{itemize}
 
 \paragraph{Giả thuyết.}
@@ -318,6 +467,7 @@ sát BF ở query trong biên độ nhiễu).
 
 \section{Kết quả và thảo luận}
 \subsection{FPR thực nghiệm bám sát lý thuyết (H1, H4)}
+\label{sec:e1result}
 Bảng~\ref{tab:fpr} và Hình~\ref{fig:fpr_mn} cho thấy FPR thực nghiệm bám sát
 công thức~(\ref{eq:fpr}) trên toàn dải $m/n$: tại $m/n=8$ lý thuyết
 \FprThEight{} so với đo được \FprEmpEight{}; tại $m/n=10$ lý thuyết
@@ -329,6 +479,15 @@ $[\FprCiLowTen{},\FprCiHighTen{}]$. Tỉ lệ bit 1 đo được tại $m/n=10$ 
 4-bit và 8-bit): khi chỉ chèn, CBF chính là BF nhìn qua phép thử ``counter
 dương''. Khoảng tin cậy chỉ phản ánh sai số trên tập truy vấn vắng mặt cố định;
 thí nghiệm chưa lấy trung bình qua nhiều họ hash/seed.
+
+Cột KTC còn cho phép một kiểm định tinh hơn: ở 5/6 cấu hình, giá trị lý
+thuyết nằm \emph{trong} KTC của giá trị đo. Ngoại lệ duy nhất là $m/n=4$:
+lý thuyết $14.689\%$ nằm ngay dưới cận dưới $14.713\%$ của KTC. Đây không
+phải mâu thuẫn mà là bằng chứng thực nghiệm cho tính chất đã nêu ở
+Mục~\ref{sec:formulas}: công thức~(\ref{eq:fpr}) là xấp xỉ kiêm \emph{cận
+dưới} của FPR thật, và độ chệch lộ rõ nhất khi bộ lọc dày đặc (ở $m/n=4$
+tỉ lệ bit 1 lên tới $0.529$). Khi bộ lọc thưa dần, độ chệch giảm nhanh và
+hai giá trị trùng khớp tới ba chữ số có nghĩa.
 
 \begin{table}[H]\centering
 \caption{E1: FPR lý thuyết vs.\ thực nghiệm và KTC Wilson 95\%
@@ -395,6 +554,16 @@ và tỉ số phản ánh bản cài đặt cụ thể dùng \texttt{bitarray}/\
 thao tác nibble và vòng lặp Python; chúng không chứng minh mọi cài đặt BF luôn
 nhanh hơn mọi cài đặt CBF.
 
+Hai xu hướng trong Bảng~\ref{tab:throughput} đáng bình luận thêm. Thứ nhất,
+throughput của \emph{mọi} thao tác giảm dần theo $m/n$: nguyên nhân không
+phải kích thước mảng mà là $k=\mathrm{round}((m/n)\ln 2)$ tăng theo, khiến
+mỗi thao tác phải băm và thăm nhiều vị trí hơn; đây là chi phí ít được
+đề cập của việc hạ FPR bằng cách tăng $m/n$. Thứ hai, trong nội bộ CBF, bản
+8-bit nhanh hơn bản 4-bit ở mọi thao tác vì không phải tách/ghép nibble,
+nhưng tốn gấp đôi bộ nhớ: ngay trong một họ cấu trúc cũng tồn tại đánh đổi
+tốc độ--dung lượng, và lựa chọn 4-bit của Fan \emph{et al.} là điểm cân
+bằng nghiêng về bộ nhớ.
+
 \begin{figure}[H]\centering
 \includegraphics[width=\textwidth]{fig/throughput.png}
 \caption{Median throughput insert, query (miss) và delete theo $m/n$; dải tô
@@ -413,6 +582,12 @@ CBF 4-bit còn \EqCellsCBFFour{} ô, FPR vọt lên \EqFprCBFFour{}; CBF 8-bit
 còn \EqCellsCBFEight{} ô, FPR \EqFprCBFEight{}. Khoảng cách
 \EqRatioFour{}--\EqRatioEight{} lần (từ hơn một tới gần hai bậc độ lớn) là
 đánh đổi dung lượng--FPR để có counter và khả năng xóa.
+
+Kết quả đo cũng được lý thuyết tiên đoán trọn vẹn: với $250\,000$ ô và
+$k=2$, công thức~(\ref{eq:fpr}) cho $30.3\%$ trong khi giá trị đo là $30.1\%$; với
+$125\,000$ ô và $k=1$: lý thuyết $55.1\%$, đo $54.9\%$
+(Bảng~\ref{tab:equalbudget}). Nói cách khác, chi phí FPR của counter có thể
+được tiên lượng đầy đủ ngay từ khâu thiết kế mà không cần đo đạc.
 
 \begin{table}[H]\centering
 \caption{E3: Cùng payload \BudgetBytes{} byte, $n=\NKeys{}$,
@@ -445,6 +620,16 @@ negative mặc định của CBF và không được tổng quát hóa sang work
 được xác nhận từ nguồn dữ liệu chuẩn; rebuild giúp khôi phục nếu contract hoặc
 thông tin counter đã bị phá vỡ.
 
+Về cơ chế, quy mô thiệt hại là ước lượng được: \FnPerformed{} lần xóa lọt
+qua guard, mỗi lần giảm $k=6$ counter, tổng cộng $12\,246$ lần giảm sai.
+Ở cấu hình $m/n=8$, trung bình mỗi ô gánh $\lambda=kn/m=0.75$ lượt băm của
+khóa thật, nên mỗi lần giảm sai có xác suất đáng kể đưa một counter đang
+phục vụ khóa thật về 0; số lần giảm ở quy mô này vì vậy ảnh hưởng tới nhiều
+nghìn khóa, và con số \FnCount{} (\FnRate{}) phù hợp với bậc độ lớn kỳ
+vọng. Rủi ro vận hành không nằm ở thiệt hại tức thời mà ở tính
+\emph{tích lũy}: mỗi chu kỳ xóa sai tiếp tục làm suy giảm bộ lọc, và không
+có cơ chế tự phục hồi nào ngoài việc rebuild.
+
 \begin{table}[H]\centering
 \caption{E4: Xóa đúng và stress test xóa sai trong CBF}
 \label{tab:falseneg}
@@ -452,19 +637,250 @@ thông tin counter đã bị phá vỡ.
 \input{tab/false_neg.tex}
 \end{table}
 
+\subsection{Đối chiếu với các biến thể (E5)}
+\label{sec:e5result}
+Để đặt BF/CBF cạnh các thiết kế hiện đại hơn, E5 cài đặt thêm Blocked Bloom
+Filter và Cuckoo Filter rồi so sánh ở cùng mức ${\approx}10$ bit/khóa
+(Bảng~\ref{tab:variants}, Hình~\ref{fig:variants}); cơ chế của từng biến
+thể được trình bày ở Mục~\ref{sec:variants}.
+
+Blocked BF với block 512~bit đạt FPR \BlkFprTen{} so với \FprEmpTen{} của
+BF chuẩn cùng $m,k$: phần thuế FPR trả cho tính cục bộ cache là có thật
+nhưng nhỏ. Trong cài đặt phần cứng hoặc C/C++, một cache miss mỗi truy vấn
+thay vì tối đa $k$ thường bù lại xứng đáng; lợi ích này nằm ngoài phạm vi
+đo của Python.
+
+Cuckoo Filter (fingerprint $f=8$~bit, bucket 4 chỗ, $2^{15}$ bucket) chèn
+đủ \NKeys{} khóa không thất bại lần nào (hệ số tải \CkLoad{}), đạt FPR
+\CkFpr{} với payload \CkMem{}~byte (\CkBitsPerKey{} bit/khóa), và xóa toàn
+bộ khóa thành công (\CkLeftover{} khóa sót lại). Điểm đáng chú ý nhất khi
+đặt cạnh nhau: trong các cấu trúc \emph{hỗ trợ xóa}, Cuckoo Filter cho FPR
+thấp hơn CBF 4-bit hơn một bậc độ lớn (\CkFpr{} so với \EqFprCBFFour{});
+điều này củng cố bằng số đo cho khuyến nghị ưu tiên Cuckoo Filter khi cần
+xóa với yêu cầu FPR chặt. Ba lưu ý về phạm vi: payload của Cuckoo là danh nghĩa
+($f$ bit mỗi chỗ); hệ số tải mới đạt \CkLoad{}, chưa ép tới ngưỡng
+${\sim}95\%$; và bản cài đặt chưa dùng semi-sorting nên chưa phản ánh cấu
+hình tối ưu không gian của công trình gốc~\cite{cuckoo2014}.
+
+\begin{table}[H]\centering
+\caption{E5: Năm cấu trúc ở cùng mức ${\approx}10$ bit/khóa ($n=\NKeys{}$)}
+\label{tab:variants}
+\input{tab/variants.tex}
+\end{table}
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.8\textwidth]{fig/variants.png}
+\caption{FPR (thang log) của năm cấu trúc ở cùng mức ${\approx}10$
+bit/khóa; nhãn dưới mỗi cột cho biết cấu trúc có hỗ trợ xóa hay không.}
+\label{fig:variants}
+\end{figure}
+
 \section{Các biến thể liên quan}
-\textbf{Blocked Bloom Filter}~\cite{putze2010}: gói toàn bộ $k$ bit của một
-khóa vào một block bằng đúng một cache line, giảm số cache miss mỗi truy vấn
-xuống $\sim$1, đổi lấy FPR tăng nhẹ; RocksDB dùng biến thể cache-line-local
-trong full filter~\cite{rocksdbBloom}; không hỗ trợ xóa.
-\textbf{Cuckoo Filter}~\cite{cuckoo2014}: lưu fingerprint trong
-bảng băm cuckoo, \emph{hỗ trợ xóa}, và cần ít không gian hơn cả BF tối ưu
-khi FPR mục tiêu $\varepsilon<3\%$; nhược điểm là chèn có thể thất bại khi
-hệ số tải vượt $\sim$95\%. \textbf{d-left CBF} (dlCBF)~\cite{bonomi2006}: dùng
-d-left hashing + fingerprint, tiết kiệm khoảng một nửa không gian so với CBF
-4-bit. Đây là một lựa chọn thay thế CBF tốt trên phần cứng.
+\label{sec:variants}
+Ba biến thể dưới đây lần lượt khắc phục các hạn chế khác nhau của cặp
+BF/CBF: chi phí cache miss, chi phí bộ nhớ của khả năng xóa, và cả hai yếu
+tố cùng lúc. Cơ chế của từng biến thể được minh họa trong các
+Hình~\ref{fig:blocked-diagram}--\ref{fig:dlcbf-diagram}; hai biến thể đầu
+đã được đối chiếu bằng số đo trong Mục~\ref{sec:e5result}.
+
+\subsection{Blocked Bloom Filter}
+Putze \emph{et al.}~\cite{putze2010} nhận xét rằng với bộ lọc lớn hơn
+cache, $k$ lần thăm bit là $k$ lần truy cập bộ nhớ ngẫu nhiên, nghĩa là tối đa
+$k$ cache miss mỗi truy vấn. Blocked Bloom Filter chia mảng thành các block
+bằng đúng một cache line (thường $B=512$~bit): một hàm băm phụ $h_0$ chọn
+block, rồi toàn bộ $k$ bit của khóa được đặt \emph{bên trong} block đó
+(Hình~\ref{fig:blocked-diagram}). Mỗi truy vấn vì vậy chỉ chạm đúng một
+cache line: số cache miss giảm từ tối đa $k$ xuống ${\sim}1$, và mọi
+phép thử sau lần nạp đầu tiên đều diễn ra trên thanh ghi/cache L1.
+
+\begin{figure}[H]\centering
+\begin{tikzpicture}[font=\small, >=Stealth,
+    cell/.style={draw=black!55, minimum width=0.40cm, minimum height=0.40cm,
+                 inner sep=0pt, fill=white},
+    on/.style={cell, fill=vizblue}]
+  \node[anchor=west, font=\small\bfseries] at (-1.6, 1.45) {BF chuẩn};
+  \foreach \i in {0,...,15} \node[cell] (a\i) at (0.44*\i, 0) {};
+  \foreach \i in {2,8,13} \node[on] at (a\i) {};
+  \node[font=\small] (ka) at (-1.0, 0.75) {$x$};
+  \draw[->, vizorange] (ka) to[bend left=12] (a2.north);
+  \draw[->, vizorange] (ka) to[bend left=14] (a8.north);
+  \draw[->, vizorange] (ka) to[bend left=16] (a13.north);
+  \node[anchor=west, font=\footnotesize, text=black!60] at (7.35, 0.02)
+        {$k$ vị trí rải khắp mảng};
+
+  \begin{scope}[yshift=-2.6cm]
+  \node[anchor=west, font=\small\bfseries] at (-1.6, 1.45) {Blocked BF};
+  \foreach \i in {0,...,15} \node[cell] (b\i) at (0.44*\i, 0) {};
+  \foreach \i in {4,8,12} \draw[black, line width=1.1pt]
+        (0.44*\i - 0.22, -0.22) -- (0.44*\i - 0.22, 0.22);
+  \foreach \i in {4,5,7} \node[on] at (b\i) {};
+  \draw[vizblue, very thick]
+        (0.44*4 - 0.21, -0.245) rectangle (0.44*8 - 0.235, 0.245);
+  \node[font=\small] (kb) at (-1.0, 0.75) {$x$};
+  \draw[->, vizorange] (kb) to[bend left=10] (b5.north);
+  \node[font=\scriptsize, text=vizorange] at (1.0, 1.0) {$h_0$ chọn block};
+  \node[anchor=west, font=\footnotesize, text=black!60] at (7.35, 0.02)
+        {$k$ vị trí trong một cache line};
+  \end{scope}
+\end{tikzpicture}
+\caption{Blocked Bloom Filter: thay vì rải $k$ bit khắp mảng (trên), toàn
+bộ $k$ bit của một khóa nằm gọn trong block 512~bit do $h_0$ chọn (dưới), nên mỗi truy vấn tốn tối đa một cache miss.}
+\label{fig:blocked-diagram}
+\end{figure}
+
+Chi phí đánh đổi nằm ở sự mất cân bằng tải: số khóa rơi vào một block xấp
+xỉ Poisson với kỳ vọng $nB/m$, nên luôn có block nhận nhiều khóa hơn mức
+trung bình và trở nên dày đặc hơn. Vì FPR là hàm lồi của tải, trung bình
+FPR trên các block cao hơn FPR của bộ lọc cân bằng hoàn hảo (bất đẳng thức
+Jensen); đây chính là phần chênh 1.16\% so với 0.82\% mà E5 đo được
+(Mục~\ref{sec:e5result}); trong thực tế người ta bù bằng cách cấp thêm một
+lượng nhỏ bit cho mỗi khóa. RocksDB dùng đúng chiến lược cache-line-local
+này trong full filter~\cite{rocksdbBloom}. Như BF gốc, cấu trúc này không
+hỗ trợ xóa.
+
+\subsection{Cuckoo Filter}
+Cuckoo Filter~\cite{cuckoo2014} khác biệt căn bản với mô hình mảng bit: mỗi
+khóa được đại diện bằng một \emph{fingerprint} $f$~bit lưu tường minh trong
+bảng băm cuckoo gồm các bucket $b$ chỗ (thường $b=4$). Mỗi khóa có đúng hai
+bucket ứng viên, xác định bằng sơ đồ \emph{partial-key cuckoo hashing}
+(Hình~\ref{fig:cuckoo-diagram}):
+\begin{equation*}
+i_1 = h(x), \qquad i_2 = i_1 \oplus h(\mathrm{fp}(x)),
+\end{equation*}
+trong đó phép XOR có tính đối hợp: từ bucket đang chứa fingerprint bất kỳ
+luôn tính được bucket thay thế \emph{mà không cần khóa gốc}; đây là điều kiện
+thiết yếu để dời chỗ (eviction) hoạt động khi bảng chỉ lưu fingerprint.
+
+\begin{figure}[H]\centering
+\begin{tikzpicture}[font=\small, >=Stealth,
+    slot/.style={draw=black!55, minimum width=0.64cm, minimum height=0.40cm,
+                 inner sep=0pt, font=\scriptsize, fill=white}]
+  \foreach \b in {0,...,7} {
+    \foreach \s in {0,...,3}
+      \node[slot] (s\b-\s) at (0.68*\b, -0.44*\s) {};
+    \node[font=\scriptsize, text=black!60] at (0.68*\b, 0.40) {\b};
+  }
+  \node[slot, fill=black!8] at (s0-0) {6E};
+  \node[slot, fill=black!8] at (s1-2) {B2};
+  \node[slot, fill=black!8] at (s3-1) {17};
+  \node[slot, fill=black!8] at (s5-0) {D4};
+  \node[slot, fill=black!8] at (s2-0) {5F};
+  \node[slot, fill=vizorange!35] at (s2-1) {A7};
+  \foreach \s/\v in {0/3C, 1/91, 2/C4, 3/0B}
+      \node[slot, fill=black!8] at (s6-\s) {\v};
+  \draw[vizblue, very thick]
+        (0.68*2-0.33, -0.44*3-0.21) rectangle (0.68*2+0.33, 0.21);
+  \draw[vizblue, very thick]
+        (0.68*6-0.33, -0.44*3-0.21) rectangle (0.68*6+0.33, 0.21);
+  \node[draw=black!55, align=left, font=\scriptsize, anchor=north]
+        (keyinfo) at (1.4, -2.35)
+        {khóa $x$:\quad $\mathrm{fp}=\mathrm{A7}$\\
+         $i_1=h(x)=2$\\ $i_2=2\oplus h(\mathrm{A7})=6$};
+  \draw[->, vizorange] (keyinfo.north) to[bend left=8] (s2-3.south);
+  \draw[->, vizorange] (keyinfo.east) to[bend right=25] (s6-3.south);
+  \draw[->, dashed, black!60] (s6-0.east) to[bend left=30] ++(1.35, 0.85);
+  \node[font=\scriptsize, text=black!60, align=left, anchor=west]
+        at (5.35, 1.35)
+        {nếu cả hai bucket đầy: đuổi 3C\\ sang bucket thay thế của nó};
+\end{tikzpicture}
+\caption{Cuckoo Filter: fingerprint A7 của khóa $x$ có hai bucket ứng viên
+$i_1=2$ và $i_2=6$; nó được đặt vào chỗ trống của bucket~2. Khi cả hai
+bucket đầy, một fingerprint bị đuổi sang bucket thay thế của chính nó
+(tính bằng XOR), lặp tối đa \texttt{MAX\_KICKS} lần.}
+\label{fig:cuckoo-diagram}
+\end{figure}
+
+Truy vấn chỉ đọc hai bucket và so tối đa $2b$ fingerprint; mỗi phép so
+trùng ngẫu nhiên với xác suất ${\sim}2^{-f}$, nên
+$\varepsilon \approx 2b\alpha/2^{f}$ với $\alpha$ là hệ số tải. Ở cấu hình
+E5 ($f=8$, $b=4$, $\alpha=76.3\%$) công thức cho ${\approx}2.4\%$, khớp số
+đo \CkFpr{} (Mục~\ref{sec:e5result}). Nhờ lưu tường minh từng phần tử,
+\emph{xóa được} bằng cách gỡ một bản sao fingerprint khỏi một trong hai
+bucket; đáng chú ý, delete ở đây mang \emph{cùng contract} với CBF: chỉ
+được xóa khóa chắc chắn đã chèn, vì gỡ fingerprint của khóa chưa chèn có
+thể gỡ nhầm fingerprint trùng của khóa khác và gây false
+negative~\cite{cuckoo2014}. Về không gian, chi phí là $f/\alpha$
+bit/khóa; với kỹ thuật semi-sorting (tiết kiệm 1~bit mỗi fingerprint), khi
+FPR mục tiêu $\varepsilon<3\%$ Cuckoo Filter cần ít bit hơn cả BF tối ưu
+không gian, nghĩa là vừa hỗ trợ xóa vừa tiết kiệm không gian hơn. Nhược điểm:
+bucket $b=4$ cho phép đẩy hệ số tải tới ${\sim}95\%$, nhưng vượt ngưỡng đó
+thao tác chèn có thể thất bại (chuỗi dời chỗ quá dài), nên hệ thống phải
+theo dõi tải và mở rộng bảng kịp thời.
+
+\subsection{d-left Counting Bloom Filter}
+dlCBF~\cite{bonomi2006} thay mảng counter thưa của CBF bằng bảng băm
+d-left: bảng chia thành $d$ bảng con, mỗi phần tử băm ra một bucket ứng
+viên trong \emph{mỗi} bảng con và được đặt vào bucket ít tải nhất, ưu tiên
+bảng bên trái khi hòa (Hình~\ref{fig:dlcbf-diagram}). Quy tắc ``chọn nơi
+ít tải trong $d$ lựa chọn'' làm tải cực đại tập trung mạnh quanh trung
+bình, nên các bucket có thể định cỡ cố định mà gần như không lãng phí chỗ;
+đây là một tính chất quý cho phần cứng vì $d$ bảng con truy cập được song
+song với độ trễ cố định.
+
+\begin{figure}[H]\centering
+\begin{tikzpicture}[font=\small, >=Stealth,
+    bucket/.style={draw=black!60, minimum width=1.78cm, minimum height=0.52cm,
+                   inner sep=0pt, fill=white},
+    entry/.style={draw=vizblue!50!black, minimum width=0.34cm,
+                  minimum height=0.34cm, inner sep=0pt, fill=vizblue!65}]
+  \foreach \t/\lbl in {0/1, 1/2, 2/3} {
+    \node[font=\small\bfseries] at (2.75*\t, 0.62) {Bảng con \lbl};
+    \foreach \r in {0,...,3} \node[bucket] (t\t-\r) at (2.75*\t, -0.72*\r) {};
+  }
+  % cac muc da luu trong bang (o vuong nho = mot muc)
+  \foreach \t/\r/\p in {0/0/0, 0/1/0, 0/1/1, 0/3/0, 1/0/0, 1/2/0,
+                        2/0/0, 2/1/0, 2/1/1, 2/3/0}
+    \node[entry] at ($(t\t-\r.west)+(0.28+0.40*\p, 0)$) {};
+  % ba bucket ung vien cua x: vien cam + nhan h_i(x)
+  \foreach \t/\r/\i in {0/1/1, 1/2/2, 2/0/3} {
+    \draw[vizorange, line width=1.2pt]
+        ($(t\t-\r.south west)+(-0.035,-0.035)$) rectangle
+        ($(t\t-\r.north east)+(0.035,0.035)$);
+    \node[font=\scriptsize, text=vizorange, anchor=east, fill=white,
+          inner sep=1.5pt] at ($(t\t-\r.west)+(-0.10, 0)$) {$h_{\i}(x)$};
+  }
+  % bucket duoc chon: vien xanh day
+  \draw[vizaqua, line width=1.8pt]
+      ($(t1-2.south west)+(-0.10,-0.10)$) rectangle
+      ($(t1-2.north east)+(0.10,0.10)$);
+  % phong to cau tao mot muc (zoom tu muc cua bucket t0-3)
+  \node[draw=black!60, minimum width=1.7cm, minimum height=0.46cm,
+        font=\scriptsize, fill=vizblue!10] (zfp) at (0.55, -3.55) {fingerprint};
+  \node[draw=black!60, minimum width=1.0cm, minimum height=0.46cm,
+        font=\scriptsize, fill=vizblue!10, anchor=west] (zct) at (zfp.east) {counter};
+  \node[font=\scriptsize, text=black!60, anchor=east]
+        at ($(zfp.west)+(-0.15, 0)$) {một mục gồm:};
+  \draw[dashed, black!45] ($(t0-3.west)+(0.11, -0.17)$) -- (zfp.north west);
+  \draw[dashed, black!45] ($(t0-3.west)+(0.45, -0.17)$) -- (zct.north east);
+  % ghi chu lua chon
+  \node[font=\footnotesize, align=left, anchor=west] at (3.35, -3.55)
+      {tải ba bucket ứng viên: $2/1/1$\\
+       $\Rightarrow$ chọn bảng con 2 (ít tải nhất,\\
+       \phantom{$\Rightarrow$ }ưu tiên bảng bên trái khi hòa)};
+\end{tikzpicture}
+\caption{d-left CBF với $d=3$: khóa $x$ băm ra một bucket ứng viên trong
+mỗi bảng con (viền cam, nhãn $h_i(x)$); mỗi ô vuông nhỏ là một mục đã lưu,
+nên tải ba ứng viên là $2/1/1$ và bucket của bảng con~2 được chọn (viền
+xanh). Phần phóng to cho thấy mỗi mục gồm một fingerprint kèm counter nhỏ
+để hỗ trợ đếm bội và xóa.}
+\label{fig:dlcbf-diagram}
+\end{figure}
+
+Mỗi ô của bucket lưu một fingerprint kèm counter nhỏ: \emph{insert} tìm
+fingerprint trong các bucket ứng viên để tăng counter (phần tử trùng) hoặc
+chiếm một ô trống; \emph{query} so fingerprint trên $d$ bucket ứng viên;
+\emph{delete} giảm counter tương ứng. False positive chỉ phát sinh khi một
+khóa lạ trùng cả bucket ứng viên lẫn fingerprint với một phần tử đã lưu.
+Vì chỉ những phần tử thực sự có mặt mới chiếm chỗ (thay vì cấp counter
+cho mọi ô kể cả ô trống như CBF), dlCBF đạt cùng chức năng đếm/xóa với
+khoảng \emph{một nửa} không gian của CBF 4-bit~\cite{bonomi2006}. Cái giá
+là logic phức tạp hơn đáng kể: bài gốc phải dùng thêm các phép hoán vị để
+giữ insert/delete nhất quán khi cùng một phần tử có thể được nhìn thấy ở
+các bảng con khác nhau. Đây là lý do báo cáo giữ dlCBF ở mức phân tích lý
+thuyết thay vì cài đặt trong E5.
 
 \section{Khuyến nghị lựa chọn}
+\label{sec:recommend}
 \begin{enumerate}
   \item \textbf{Tập tĩnh hoặc rebuild được}:\\
         (SSTable bất biến, Cache Digest, chữ ký DPI ít đổi) dùng \textbf{BF}.\\
@@ -482,17 +898,37 @@ d-left hashing + fingerprint, tiết kiệm khoảng một nửa không gian so 
         Filter}, chấp nhận FPR tăng nhẹ.
 \end{enumerate}
 
+\paragraph{Ví dụ thiết kế tham số.}
+Yêu cầu: lọc $n=10^{7}$ khóa với FPR mục tiêu $p=1\%$, tập gần như tĩnh.
+Áp dụng~(\ref{eq:kopt}):
+\begin{equation*}
+m=-\frac{n\ln(0.01)}{(\ln 2)^{2}}\approx 9.59\times10^{7}\ \text{bit}
+\approx 11.4\ \text{MiB},\qquad
+\frac{m}{n}\approx 9.59,\qquad
+k=\mathrm{round}(9.59\ln 2)=7.
+\end{equation*}
+Thay lại~(\ref{eq:fpr}) để kiểm tra: FPR $=1.00\%$, đạt mục tiêu. Nếu cùng
+số ô phải chuyển sang counter để xóa được: CBF 4-bit tốn $45.7$~MiB, CBF
+8-bit tốn $91.4$~MiB, tức chênh lệch hơn 34~MiB so với BF chỉ để đổi lấy
+thao tác delete. Do tập gần như tĩnh, lựa chọn phù hợp là BF kèm lịch rebuild;
+chỉ khi xuất hiện yêu cầu xóa tức thời mới cân nhắc chi phí của CBF, hoặc
+chuyển sang Cuckoo Filter nếu FPR mục tiêu vẫn ở mức chặt
+(Mục~\ref{sec:variants}).
+
 \section{Kết luận}
 Thực nghiệm xác nhận bốn giả thuyết: FPR của BF/CBF trùng nhau và
 bám công thức lý thuyết trong sai số lấy mẫu (H1), payload CBF 4-bit bằng
 $4\times$ BF (H2), và trong cài đặt Python đang xét BF có median throughput
 cao hơn CBF 4-bit ở các thao tác chung (H3); FPR giảm mũ theo $m/n$ với cực
-tiểu theo $k$ tại $k^*$ (H4). Bức tranh tổng thể: \emph{CBF mua khả năng xóa
-bằng payload counter lớn hơn và một contract delete chặt hơn}. Khi chỉ xóa
+tiểu theo $k$ tại $k^*$ (H4). Bức tranh tổng thể: \emph{CBF đạt được khả
+năng xóa bằng cách đánh đổi payload counter lớn hơn và một contract delete
+chặt chẽ hơn}. Khi chỉ xóa
 khóa chắc chắn đã chèn và không overflow, thí nghiệm không quan sát false
 negative; false negative xuất hiện trong stress test khi cố ý xóa các khóa
 vắng mặt. Do đó BF phù hợp với tập tĩnh/rebuild được; CBF phù hợp với tập động
-khi có nguồn dữ liệu chuẩn cho delete; và Cuckoo Filter đáng khảo sát khi cần xóa
+khi có nguồn dữ liệu chuẩn cho delete; và Cuckoo Filter, với FPR thấp hơn
+CBF 4-bit hơn một bậc độ lớn ở cùng ngân sách trong E5, đáng được ưu tiên
+khảo sát khi cần xóa
 với yêu cầu FPR/bộ nhớ chặt.
 
 \paragraph{Hạn chế.} Benchmark dùng một bản cài đặt Python cụ thể; dù đã báo
@@ -502,7 +938,10 @@ seed; KTC Wilson chỉ phản ánh sai số trên các truy vấn vắng mặt, 
 biến thiên qua nhiều họ hash/seed. Công thức~(\ref{eq:fpr}) là xấp xỉ (và là
 cận dưới); với $m$ nhỏ nên đo thực nghiệm. Phân tích giả định hàm băm lý
 tưởng; double hashing chỉ hợp lệ tiệm cận và môi trường đối kháng cần hàm băm
-có khóa. Các số bộ nhớ chỉ là payload của mảng backing, không phải RSS.
+có khóa. Các số bộ nhớ chỉ là payload của mảng backing, không phải RSS. Bản
+cài đặt Blocked BF và Cuckoo Filter trong E5 chỉ nhằm đối chiếu FPR và chức
+năng xóa; chúng chưa tối ưu không gian (semi-sorting) lẫn tốc độ, nên không
+dùng để so sánh throughput.
 
 \begin{thebibliography}{9}
 \bibitem{bloom1970} B.~H. Bloom, ``Space/time trade-offs in hash coding with
@@ -533,4 +972,5 @@ J.~Lockwood, ``Deep Packet Inspection using Parallel Bloom Filters,'' in
 \href{https://github.com/facebook/rocksdb/wiki/RocksDB-Bloom-Filter}
 {``RocksDB Bloom Filter,''} project documentation, accessed Aug.~10, 2026.
 \end{thebibliography}
+
 \end{document}

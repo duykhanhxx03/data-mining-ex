@@ -1,0 +1,9 @@
+\babel@toc {vietnamese}{}\relax 
+\contentsline {table}{\numberline {1}{\ignorespaces Giá trị lý thuyết: số hàm băm tối ưu và FPR theo tỉ lệ $m/n$}}{5}{table.1}%
+\contentsline {table}{\numberline {2}{\ignorespaces So sánh Bloom Filter và Counting Bloom Filter}}{7}{table.2}%
+\contentsline {table}{\numberline {3}{\ignorespaces E1: FPR lý thuyết vs.\ thực nghiệm và KTC Wilson 95\% ($n=100\,000{}$, $k=\mathrm {round}((m/n)\ln 2)$)}}{10}{table.3}%
+\contentsline {table}{\numberline {4}{\ignorespaces E1: Dung lượng payload của mảng backing theo $m/n$ ($n=100\,000{}$)}}{11}{table.4}%
+\contentsline {table}{\numberline {5}{\ignorespaces E1: Median throughput qua 5{} lượt (nghìn thao tác/giây; CBF4 = CBF 4-bit)}}{11}{table.5}%
+\contentsline {table}{\numberline {6}{\ignorespaces E3: Cùng payload 125\,000{} byte, $n=100\,000{}$, $k$ tối ưu cho từng cấu trúc}}{13}{table.6}%
+\contentsline {table}{\numberline {7}{\ignorespaces E4: Xóa đúng và stress test xóa sai trong CBF}}{14}{table.7}%
+\contentsline {table}{\numberline {8}{\ignorespaces E5: Năm cấu trúc ở cùng mức ${\approx }10$ bit/khóa ($n=100\,000{}$)}}{14}{table.8}%
