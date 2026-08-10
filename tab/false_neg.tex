@@ -3,9 +3,11 @@
 Đại lượng & Giá trị\\
 \midrule
 Cấu hình & $m/n=8$, $k=6$, $n=100\,000$\\
+Counter lớn nhất sau insert & 8\\
+Xóa đúng / FN trong khóa thật còn lại & 20\,000 / 0\\
 Khóa vắng mặt bị báo nhầm ``có'' (false positive) & 2\,164\\
-Lần xóa thực sự thực hiện (delete có kiểm tra) & 2\,041\\
-Phần tử thật bị mất (false negative) & 8\,063\\
-Tỉ lệ false negative & 8.063\%\\
+Lần xóa sai lọt qua query guard & 2\,041\\
+Phần tử thật bị mất trong stress test & 8\,063\\
+Tỉ lệ false negative trong stress test & 8.063\%\\
 \bottomrule
 \end{tabular}

@@ -1,8 +1,16 @@
 \documentclass[11pt,a4paper]{article}
 
-% ====== HO TRO TIENG VIET (pdflatex + vntex) ======
-\usepackage[utf8]{inputenc}
-\usepackage[T5]{fontenc}
+% ====== HO TRO TIENG VIET (pdfLaTeX hoac XeTeX/Tectonic) ======
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[utf8]{inputenc}
+  \usepackage[T5]{fontenc}
+\else
+  \usepackage{fontspec}
+  \setmainfont{Noto Serif}
+  \setsansfont{Noto Sans}
+  \setmonofont{Noto Sans Mono}
+\fi
 \usepackage[vietnamese]{babel}
 
 \usepackage{amsmath,amssymb}
@@ -12,6 +20,7 @@
 \usepackage{float}
 \usepackage{algorithm}
 \usepackage{algpseudocode}   % thuoc goi algorithmicx
+\algrenewcommand\textproc[1]{\textbf{#1}}
 \usepackage{xcolor}
 \usepackage[hidelinks,unicode]{hyperref}
 \usepackage{geometry}
@@ -25,7 +34,8 @@
 
 \title{So sánh Bloom Filter và Counting Bloom Filter\\
        trong bài toán lọc dữ liệu tốc độ cao}
-\author{Báo cáo học thuật}
+\author{Họ và tên: \rule{5cm}{0.4pt}\\
+        MSSV: \rule{3.5cm}{0.4pt}}
 \date{\today}
 
 \begin{document}
@@ -40,15 +50,16 @@ positive), phân tích tràn counter, mã giả cho các thao tác insert/query/
 và một bộ thực nghiệm Python tự cài đặt cả hai cấu trúc. Kết quả trên
 $n=\NKeys{}$ khóa xác nhận: (i) tỉ lệ dương tính giả (FPR) thực nghiệm bám sát
 công thức $p=(1-e^{-kn/m})^k$ và khi dùng cùng bộ hàm băm, cùng $m$, $k$ thì BF
-và CBF cho kết quả truy vấn \emph{trùng nhau từng khóa}; (ii) CBF 4-bit tốn
-đúng $4\times$ bộ nhớ BF, do đó với cùng ngân sách byte, FPR của CBF
-(\EqFprCBFFour{}) cao hơn BF (\EqFprBF{}) khoảng \EqRatioFour{} lần ---
-hơn một bậc độ lớn; (iii) CBF hỗ trợ
-xóa nhưng việc xóa phần tử bị nhận nhầm (false positive) tạo ra
-\FnCount{} false negative (\FnRate{}) --- loại lỗi mà BF không bao giờ mắc.
-Kết luận: dùng BF cho tập gần như tĩnh; chỉ dùng CBF khi bắt buộc phải xóa
-động; khi cần xóa với FPR mục tiêu $<3\%$, Cuckoo Filter là lựa chọn đáng
-cân nhắc hơn.
+và CBF cho kết quả truy vấn \emph{trùng nhau từng khóa}; (ii) payload của
+CBF 4-bit tốn đúng $4\times$ BF, do đó với cùng ngân sách byte, FPR của CBF
+(\EqFprCBFFour{}) cao hơn BF (\EqFprBF{}) khoảng \EqRatioFour{} lần,
+tức hơn một bậc độ lớn; (iii) CBF hỗ trợ
+xóa an toàn khi caller chỉ xóa khóa chắc chắn đã chèn: xóa đúng
+\FnValidDeleted{} khóa không làm mất khóa thật nào còn lại, trong khi stress
+test cố ý xóa các false positive tạo ra \FnCount{} false negative
+(\FnRate{}). Kết luận: dùng BF cho tập gần như tĩnh; dùng CBF khi cần xóa động
+và hệ thống bảo đảm được contract của delete; khi cần xóa với FPR mục tiêu
+$<3\%$, Cuckoo Filter là lựa chọn đáng cân nhắc hơn.
 \end{abstract}
 
 \section{Giới thiệu}
@@ -58,14 +69,14 @@ xỉ} (approximate set-membership): cho tập $S$ và khóa $x$ (gói tin, chữ
 \emph{chắc chắn không} thuộc $S$'' hoặc ``$x$ \emph{có thể} thuộc $S$'' với
 ngân sách bộ nhớ đủ nhỏ để nằm gọn trong SRAM/cache. Việc chấp nhận một tỉ lệ
 nhỏ dương tính giả cho phép giảm mạnh không gian lưu trữ so với bảng băm chính
-xác --- đây là đánh đổi không gian/thời gian kinh điển của
+xác. Đây là đánh đổi không gian/thời gian kinh điển của
 Bloom~\cite{bloom1970}.
 
 Các miền ứng dụng tiêu biểu gồm: (i) \emph{lọc gói tin và DPI/IDS}: đối sánh
 chữ ký Snort bằng Bloom filter song song trên FPGA~\cite{dpi2003}; (ii)
-\emph{lọc truy vấn cơ sở dữ liệu} kiểu LSM-tree: Cassandra, RocksDB, HBase gắn
-một BF cho mỗi SSTable để bỏ qua các tệp ``chắc chắn không chứa khóa'', tránh
-I/O đĩa; (iii) \emph{web cache hợp tác}: Cache Digest của Squid và giao thức
+\emph{lọc truy vấn cơ sở dữ liệu} kiểu LSM-tree: RocksDB có thể gắn một BF cho
+mỗi SSTable để bỏ qua các tệp ``chắc chắn không chứa khóa'', tránh I/O
+đĩa~\cite{rocksdbBloom}; (iii) \emph{web cache hợp tác}: Cache Digest của Squid và giao thức
 Summary Cache~\cite{fan2000}; (iv) \emph{khử trùng lặp} (deduplication) trên
 fingerprint khối dữ liệu.
 
@@ -87,11 +98,13 @@ có thể tắt nhầm bit đang được phần tử khác dùng chung.
 \subsection{Counting Bloom Filter (Fan \emph{et al.}, 2000)}
 CBF thay mỗi bit bằng một \emph{counter} $b$ bit (thường $b=4$), ký hiệu
 $C[i]$. \emph{Insert} tăng, \emph{Delete} giảm $k$ counter tương ứng;
-\emph{Query} trả ``có thể có'' khi mọi counter dương. CBF hỗ trợ xóa vì mỗi
-counter đếm số phần tử băm vào ô đó; đổi lại phát sinh hai rủi ro:
-\emph{tràn counter} khi hơn $2^b-1$ phần tử băm vào cùng một ô, và
-\emph{false negative} nếu dùng counter bão hòa hoặc xóa sai (xóa phần tử chưa
-từng chèn nhưng bị báo nhầm là ``có'')~\cite{fan2000,broder2004}.
+\emph{Query} trả ``có thể có'' khi mọi counter dương. Contract của Delete yêu
+cầu caller chỉ xóa khóa chắc chắn đã chèn: câu trả lời ``có thể có'' của Query
+không chứng minh membership và không thể dùng làm điều kiện đủ để xóa. Khi
+contract này được tuân thủ và counter không mất thông tin do tràn, CBF không
+sinh false negative. Hai nguồn phá vỡ bảo đảm là \emph{tràn counter} khi hơn
+$2^b-1$ phần tử băm vào cùng một ô, và \emph{xóa sai} một phần tử chưa từng
+chèn~\cite{fan2000,broder2004}.
 
 \subsection{Công thức xác suất}
 \label{sec:formulas}
@@ -104,8 +117,8 @@ Xác suất dương tính giả (cả $k$ bit của một khóa lạ đều bằ
 \label{eq:fpr}
 p \;\approx\; \left(1-e^{-kn/m}\right)^{k}.
 \end{equation}
-Cực tiểu hóa $p$ theo $k$ (tương đương yêu cầu tỉ lệ bit $0$ bằng $1/2$ ---
-entropy cực đại) cho số hàm băm tối ưu và bộ nhớ tối ưu theo FPR mục tiêu $p$:
+Cực tiểu hóa $p$ theo $k$ (tương đương yêu cầu tỉ lệ bit $0$ bằng $1/2$,
+tức entropy cực đại) cho số hàm băm tối ưu và bộ nhớ tối ưu theo FPR mục tiêu $p$:
 \begin{equation}
 \label{eq:kopt}
 k^{*}=\frac{m}{n}\ln 2\approx 0.693\,\frac{m}{n},\qquad
@@ -125,14 +138,18 @@ $\mathrm{B}(nk,1/m)\approx\mathrm{Poisson}(\lambda)$ với $\lambda=kn/m=\ln 2$
 \end{equation}
 và Fan \emph{et al.} chặn trên toàn cục: với $k\le(\ln 2)m/n$,
 $\Pr[\max_i C[i]\ge 16]\le m\cdot 1.37\times10^{-15}$~\cite{fan2000}. Vì
-xác suất này ``minuscule'', counter 4 bit (đếm $0..15$, bão hòa ở 15) đủ cho
-hầu hết ứng dụng --- CBF tốn $4\times$ bộ nhớ so với BF cùng số
-ô~\cite{broder2004}.
+xác suất này ``minuscule'', counter 4 bit (đếm $0..15$) đủ cho hầu hết ứng
+dụng. CBF tốn $4\times$ payload so với BF cùng số ô~\cite{broder2004}.
+Nếu insert bão hòa ở 15 rồi delete vẫn giảm như counter thường, số lần tăng
+vượt ngưỡng đã bị mất và false negative có thể xuất hiện sau nhiều lần xóa.
+Chính sách ``sticky saturation'' (không bao giờ giảm ô đã bão hòa) tránh lỗi
+này nhưng đổi lại tạo false positive dai dẳng; do đó hệ thống thực tế cần
+theo dõi overflow hoặc rebuild từ nguồn dữ liệu chuẩn.
 
 \paragraph{Hai hệ quả cho việc so sánh.}
 (1)~Với \emph{cùng} $m$, $k$ và cùng bộ hàm băm, một ô của CBF dương khi và
 chỉ khi bit tương ứng của BF bằng 1 (khi chỉ chèn, chưa xóa), nên hai cấu
-trúc trả lời truy vấn \emph{giống hệt nhau từng khóa} --- CBF không ``chính
+trúc trả lời truy vấn \emph{giống hệt nhau từng khóa}; CBF không ``chính
 xác hơn'' BF. (2)~Với \emph{cùng ngân sách byte}, BF có số ô gấp $b$ lần CBF
 $b$-bit, nên FPR của BF luôn thấp hơn hẳn (Mục~\ref{sec:equalbudget}).
 
@@ -145,16 +162,16 @@ $b$-bit, nên FPR của BF luôn thấp hơn hẳn (Mục~\ref{sec:equalbudget})
 \EndProcedure
 \Procedure{BF-Query}{$x$}
   \For{$i \gets 1$ \textbf{to} $k$}
-     \If{$B[h_i(x)] = 0$} \State \Return \textsc{False} \Comment{chắc chắn không}
+     \If{$B[h_i(x)] = 0$} \State \Return \texttt{False} \Comment{chắc chắn không}
      \EndIf
   \EndFor
-  \State \Return \textsc{True} \Comment{có thể có}
+  \State \Return \texttt{True} \Comment{có thể có}
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
 \begin{algorithm}[H]
-\caption{Counting Bloom Filter: Insert, Query, Delete (counter bão hòa)}
+\caption{Counting Bloom Filter: Insert, Query, Delete (insert bão hòa)}
 \begin{algorithmic}[1]
 \Procedure{CBF-Insert}{$x$}
   \For{$i \gets 1$ \textbf{to} $k$}
@@ -164,17 +181,16 @@ $b$-bit, nên FPR của BF luôn thấp hơn hẳn (Mục~\ref{sec:equalbudget})
 \EndProcedure
 \Procedure{CBF-Query}{$x$}
   \For{$i \gets 1$ \textbf{to} $k$}
-     \If{$C[h_i(x)] = 0$} \State \Return \textsc{False} \EndIf
+     \If{$C[h_i(x)] = 0$} \State \Return \texttt{False} \EndIf
   \EndFor
-  \State \Return \textsc{True}
+  \State \Return \texttt{True}
 \EndProcedure
 \Procedure{CBF-Delete}{$x$}
-  \If{\textsc{CBF-Query}$(x)$} \Comment{chỉ xóa nếu được xem là có mặt}
-     \For{$i \gets 1$ \textbf{to} $k$}
-        \If{$0 < C[h_i(x)] < 2^{b}-1$} \State $C[h_i(x)] \gets C[h_i(x)]-1$
-        \EndIf \Comment{không giảm counter đã bão hòa}
-     \EndFor
-  \EndIf
+  \State \textbf{Tiền điều kiện:} caller biết $x$ đã được chèn
+  \For{$i \gets 1$ \textbf{to} $k$}
+     \If{$C[h_i(x)] > 0$} \State $C[h_i(x)] \gets C[h_i(x)]-1$
+     \EndIf
+  \EndFor
 \EndProcedure
 \end{algorithmic}
 \end{algorithm}
@@ -184,15 +200,18 @@ $b$-bit, nên FPR của BF luôn thấp hơn hẳn (Mục~\ref{sec:equalbudget})
 \caption{So sánh Bloom Filter và Counting Bloom Filter}
 \label{tab:qualitative}
 \small
-\begin{tabular}{@{}lll@{}}
+\begin{tabular}{@{}
+  >{\raggedright\arraybackslash}p{0.24\textwidth}
+  >{\raggedright\arraybackslash}p{0.28\textwidth}
+  >{\raggedright\arraybackslash}p{0.40\textwidth}@{}}
 \toprule
 Tiêu chí & Bloom Filter & Counting Bloom Filter \\
 \midrule
 Đơn vị ô          & 1 bit                  & counter $b$ bit ($b{=}4$) \\
-Bộ nhớ            & $m$ bit                & $b\cdot m$ bit ($\sim4\times$) \\
-Xóa (delete)      & Không                  & Có \\
+Bộ nhớ payload    & $m$ bit                & $b\cdot m$ bit ($\sim4\times$) \\
+Xóa (delete)      & Không                  & Có, với khóa biết chắc đã chèn \\
 False positive    & Có, $p\approx(1-e^{-kn/m})^k$ & Có (cùng công thức) \\
-False negative    & Không bao giờ          & Có thể (tràn/xóa sai) \\
+False negative    & Không bao giờ          & Không nếu dùng đúng; có thể khi tràn/xóa sai \\
 Insert/Query      & $O(k)$                 & $O(k)$ \\
 FPR cùng ngân sách byte & Thấp hơn ($b\times$ số ô) & Cao hơn \\
 Song song hóa cập nhật & Ghi 1 bit an toàn & Đọc--sửa--ghi cần đồng bộ \\
@@ -206,43 +225,49 @@ Hợp phần cứng     & Rất tốt (SRAM on-chip) & Tốn SRAM hơn (thườn
 \section{Phương pháp thực nghiệm}
 \label{sec:method}
 \paragraph{Môi trường.} Python \EnvPython{}, CPU \EnvCPU{}; các gói
-\texttt{mmh3} (MurmurHash3), \texttt{bitarray}, \texttt{matplotlib},
-\texttt{numpy} và \texttt{pandas}. Toàn bộ mã thực nghiệm nằm trong
-notebook \texttt{thuc\_nghiem.ipynb}; chạy hết \RuntimeSec{} giây.
+\texttt{mmh3} \EnvMmhThree{}, \texttt{bitarray} \EnvBitarray{},
+\texttt{matplotlib} \EnvMatplotlib{}, \texttt{numpy} \EnvNumpy{} và
+\texttt{pandas} \EnvPandas{}. Toàn bộ mã thực nghiệm nằm trong notebook
+\texttt{thuc\_nghiem.ipynb}; chạy hết \RuntimeSec{} giây.
 
 \paragraph{Cài đặt.} Ba cấu trúc được cài đặt từ đầu
 (notebook \texttt{thuc\_nghiem.ipynb}): \textbf{BF} dùng mảng bit
 (\texttt{bitarray}); \textbf{CBF 4-bit} đóng gói 2 counter/byte (nibble
-packing) --- đúng chi phí $4\times$ như phân tích lý thuyết; \textbf{CBF
-8-bit} dùng 1 byte/counter (cách cài đặt đơn giản thường gặp, chi phí
-$8\times$). Cả ba dùng chung sơ đồ double hashing Kirsch--Mitzenmacher
+packing), đúng chi phí $4\times$ như phân tích lý thuyết; \textbf{CBF
+8-bit} dùng counter đúng 8 bit ($0..255$), chi phí $8\times$. Cả ba dùng
+chung sơ đồ double hashing Kirsch--Mitzenmacher
 $g_i(x)=(h_1(x)+i\,h_2(x)) \bmod m$ với $h_1,h_2$ là MurmurHash3 hai seed
 khác nhau~\cite{kirsch2008}, nhờ đó BF và CBF thăm \emph{cùng các vị trí} với
-mỗi khóa --- cô lập đúng biến số cần so sánh. Delete của CBF có kiểm tra
-Query trước (chỉ xóa khi phần tử được xem là có mặt) và không giảm counter đã
-bão hòa.
+mỗi khóa, qua đó cô lập đúng biến số cần so sánh. Delete chuẩn giả định caller
+biết khóa đã chèn và không thêm Query; riêng E4 dùng một hàm có Query guard để
+chứng minh guard này vẫn không ngăn được xóa sai khi gặp false positive.
 
 \paragraph{Dữ liệu và tham số.} $n=\NKeys{}$ khóa ``có mặt''
 (\texttt{P000000000}\dots) được chèn và $n'=\NKeys{}$ khóa ``vắng mặt''
 (\texttt{A000000000}\dots) dùng đo FPR; sinh tất định để tái lập được. Tỉ lệ
 $m/n\in\{4,6,8,10,12,16\}$; $k=\mathrm{round}((m/n)\ln 2)$ trừ khi quét $k$.
+FPR được báo cùng khoảng tin cậy Wilson 95\%. Các phép đo throughput lặp
+\BenchRepeats{} lượt, dùng median làm giá trị trung tâm và IQR làm độ phân tán;
+insert/delete dùng filter mới ở mỗi lượt để bảo đảm trạng thái đầu vào giống
+nhau.
 
 \paragraph{Bốn thực nghiệm.}
 \begin{itemize}
-  \item[\textbf{E1}] FPR thực nghiệm vs.\ lý thuyết và thông lượng
-        insert/query/delete theo $m/n$.
-  \item[\textbf{E2}] FPR theo $k\in\{1,\dots,12\}$ tại $m/n=10$ --- kiểm chứng
+  \item[\textbf{E1}] FPR thực nghiệm vs.\ lý thuyết (kèm KTC 95\%) và
+        throughput median/IQR của insert/query/delete theo $m/n$.
+  \item[\textbf{E2}] FPR theo $k\in\{1,\dots,12\}$ tại $m/n=10$ để kiểm chứng
         $k^*=(m/n)\ln 2$.
-  \item[\textbf{E3}] Cố định ngân sách \BudgetBytes{} byte, so FPR của BF
-        (1 bit/ô), CBF 4-bit và CBF 8-bit.
-  \item[\textbf{E4}] Minh họa false negative: xóa các khóa vắng mặt bị CBF
-        báo nhầm ``có'', rồi đếm số phần tử thật bị mất.
+  \item[\textbf{E3}] Cố định payload \BudgetBytes{} byte, so đánh đổi FPR của
+        BF (1 bit/ô), CBF 4-bit và CBF 8-bit.
+  \item[\textbf{E4}] Kiểm tra xóa đúng không làm mất khóa thật còn lại, sau
+        đó stress test việc xóa khóa vắng mặt bị CBF báo nhầm ``có''.
 \end{itemize}
 
 \paragraph{Giả thuyết.}
-\textbf{H1}: FPR thực nghiệm của BF và CBF (cùng $m,k$) trùng nhau và bám
-đường lý thuyết. \textbf{H2}: bộ nhớ CBF 4-bit $=4\times$ BF (8-bit
-$=8\times$). \textbf{H3}: thông lượng BF $\ge$ CBF; CBF thêm chi phí delete.
+\textbf{H1}: FPR thực nghiệm của BF và CBF (cùng $m,k$) trùng nhau và gần
+đường lý thuyết trong sai số lấy mẫu. \textbf{H2}: payload CBF 4-bit
+$=4\times$ BF (8-bit $=8\times$). \textbf{H3}: trong cài đặt Python đang xét,
+throughput BF $\ge$ CBF cho các thao tác chung.
 \textbf{H4}: FPR giảm mũ theo $m/n$; cực tiểu theo $k$ đạt quanh $k^*$.
 
 \section{Kết quả và thảo luận}
@@ -250,23 +275,26 @@ $=8\times$). \textbf{H3}: thông lượng BF $\ge$ CBF; CBF thêm chi phí delet
 Bảng~\ref{tab:fpr} và Hình~\ref{fig:fpr_mn} cho thấy FPR thực nghiệm bám sát
 công thức~(\ref{eq:fpr}) trên toàn dải $m/n$: tại $m/n=8$ lý thuyết
 \FprThEight{} so với đo được \FprEmpEight{}; tại $m/n=10$ lý thuyết
-\FprThTen{} so với \FprEmpTen{}. Tỉ lệ bit 1 đo được tại $m/n=10$ là
+\FprThTen{} so với \FprEmpTen{}, với KTC Wilson 95\%
+$[\FprCiLowTen{},\FprCiHighTen{}]$. Tỉ lệ bit 1 đo được tại $m/n=10$ là
 \FillEmpTen{} (lý thuyết \FillThTen{}, xấp xỉ mức $1/2$ entropy cực đại).
 Đúng như phân tích ở Mục~\ref{sec:formulas}, cột FPR của BF và CBF
-\emph{trùng nhau từng giá trị} (được kiểm tra bằng \texttt{assert} trên từng
-khóa): khi chỉ chèn, CBF chính là BF nhìn qua phép thử ``counter dương''.
+\emph{trùng nhau từng khóa} (được kiểm tra bằng \texttt{assert} cho cả CBF
+4-bit và 8-bit): khi chỉ chèn, CBF chính là BF nhìn qua phép thử ``counter
+dương''. Khoảng tin cậy chỉ phản ánh sai số trên tập truy vấn vắng mặt cố định;
+thí nghiệm chưa lấy trung bình qua nhiều họ hash/seed.
 
 \begin{table}[H]\centering
-\caption{E1 --- FPR lý thuyết vs.\ thực nghiệm ($n=\NKeys{}$,
-$k=\mathrm{round}((m/n)\ln 2)$)}
+\caption{E1: FPR lý thuyết vs.\ thực nghiệm và KTC Wilson 95\%
+($n=\NKeys{}$, $k=\mathrm{round}((m/n)\ln 2)$)}
 \label{tab:fpr}
-\input{tab/fpr.tex}
+\resizebox{\textwidth}{!}{\input{tab/fpr.tex}}
 \end{table}
 
 \begin{figure}[H]\centering
 \includegraphics[width=0.72\textwidth]{fig/fpr_vs_mn.png}
-\caption{FPR theo $m/n$ (trục tung log). Điểm thực nghiệm của BF và CBF
-trùng khít lên đường lý thuyết $p=(1-e^{-kn/m})^k$ tại $k=k^*$.}
+\caption{FPR theo $m/n$ (trục tung log). BF và CBF trùng nhau; thanh sai số
+là KTC Wilson 95\%, đường liền là $p=(1-e^{-kn/m})^k$ tại $k=k^*$.}
 \label{fig:fpr_mn}
 \end{figure}
 
@@ -285,56 +313,63 @@ $k^*=(m/n)\ln 2\approx 7$.}
 \end{figure}
 
 \subsection{Bộ nhớ: CBF trả giá \texorpdfstring{$4\times$}{4×} (H2)}
-Bảng~\ref{tab:memory} xác nhận chi phí bộ nhớ đo thực tế: CBF 4-bit (nibble
-packing) tốn đúng $4.0\times$ BF ở mọi cấu hình; bản cài đặt đơn giản bằng
-byte (uint8) tốn $8\times$. Tại $m/n=10$: BF dùng \MemBFTen{} byte, CBF 4-bit
-\MemCBFFourTen{} byte, CBF 8-bit \MemCBFEightTen{} byte.
+Bảng~\ref{tab:memory} xác nhận dung lượng payload của mảng backing: CBF 4-bit
+(nibble packing) tốn đúng $4.0\times$ BF ở mọi cấu hình; CBF 8-bit tốn
+$8\times$. Tại $m/n=10$: BF dùng \MemBFTen{} byte, CBF 4-bit
+\MemCBFFourTen{} byte, CBF 8-bit \MemCBFEightTen{} byte. Các số này không bao
+gồm object header, allocator hay RSS của tiến trình; hệ số $4\times/8\times$
+được suy ra trực tiếp từ cách biểu diễn, không phải một phát hiện về runtime.
 
 \begin{table}[H]\centering
-\caption{E1 --- Bộ nhớ cấp phát thực tế theo $m/n$ ($n=\NKeys{}$)}
+\caption{E1: Dung lượng payload của mảng backing theo $m/n$ ($n=\NKeys{}$)}
 \label{tab:memory}
 \input{tab/memory.tex}
 \end{table}
 
 \subsection{Thông lượng (H3)}
 \begin{table}[H]\centering
-\caption{E1 --- Thông lượng (nghìn thao tác/giây; CBF4 = CBF 4-bit)}
+\caption{E1: Median throughput qua \BenchRepeats{} lượt
+(nghìn thao tác/giây; CBF4 = CBF 4-bit)}
 \label{tab:throughput}
 \input{tab/throughput.tex}
 \end{table}
 
 Tại $m/n=10$ (Bảng~\ref{tab:throughput}, Hình~\ref{fig:throughput}): BF đạt
 \InsBFTen{} nghìn insert/s so với \InsCBFTen{} của CBF 4-bit (nhanh gấp
-\InsRatioTen{} lần) --- CBF phải đọc--sửa--ghi nibble thay vì chỉ bật bit.
+\InsRatioTen{} lần) vì CBF phải đọc--sửa--ghi nibble thay vì chỉ bật bit.
 Với query trên khóa vắng mặt, BF đạt \QmissBFTen{} nghìn thao tác/s so với
 \QmissCBFTen{} của CBF (gấp \QmissRatioTen{} lần). Query trên khóa vắng mặt
 (miss) nhanh hơn trên khóa có mặt (hit): với BF là \QmissBFTen{} so với
 \QhitBFTen{} nghìn thao tác/s, vì truy vấn miss thoát sớm ngay khi gặp bit 0
 đầu tiên, còn truy vấn hit luôn phải thăm đủ $k$ vị trí.
-Delete của CBF 4-bit chỉ đạt \DelCBFTen{} nghìn thao tác/s --- đắt nhất trong
-các thao tác vì gồm một lượt Query đầy đủ cộng $k$ lần đọc--sửa--ghi. Lưu ý
-các con số tuyệt đối phản ánh chi phí thông dịch của Python; điều có ý nghĩa
-là \emph{tỉ số tương đối} giữa các cấu trúc, còn cài đặt C/C++ sẽ nhanh hơn
-1--2 bậc độ lớn.
+Delete chuẩn của CBF 4-bit đạt \DelCBFTen{} nghìn thao tác/s; phép đo giả định
+caller biết khóa đã chèn và không cộng thêm một lượt Query. Mỗi điểm là median
+của \BenchRepeats{} lượt, dải tô trên Hình~\ref{fig:throughput} là IQR. Các số
+và tỉ số phản ánh cụ thể hiện thực \texttt{bitarray}/\texttt{bytearray}, thao
+tác nibble và vòng lặp Python; chúng không chứng minh mọi cài đặt BF luôn nhanh
+hơn mọi cài đặt CBF.
 
 \begin{figure}[H]\centering
 \includegraphics[width=\textwidth]{fig/throughput.png}
-\caption{Thông lượng insert, query (miss) và delete theo $m/n$.}
+\caption{Median throughput insert, query (miss) và delete theo $m/n$; dải tô
+là IQR của \BenchRepeats{} lượt đo.}
 \label{fig:throughput}
 \end{figure}
 
-\subsection{Cùng ngân sách bộ nhớ: BF thắng áp đảo}
+\subsection{Đánh đổi FPR khi cố định payload bộ nhớ}
 \label{sec:equalbudget}
-Đây là góc so sánh công bằng nhất khi bộ nhớ là ràng buộc cứng (SRAM
-on-chip). Với cùng \BudgetBytes{} byte (Bảng~\ref{tab:equalbudget},
+Khi dung lượng payload là ràng buộc cứng (ví dụ SRAM on-chip), phép so này
+cho thấy chi phí FPR của counter; nó không làm hai cấu trúc tương đương chức
+năng vì BF không hỗ trợ delete. Với cùng \BudgetBytes{} byte
+(Bảng~\ref{tab:equalbudget},
 Hình~\ref{fig:equalbudget}): BF có \EqCellsBF{} ô nên FPR chỉ \EqFprBF{};
 CBF 4-bit còn \EqCellsCBFFour{} ô, FPR vọt lên \EqFprCBFFour{}; CBF 8-bit
 còn \EqCellsCBFEight{} ô, FPR \EqFprCBFEight{}. Khoảng cách
-\EqRatioFour{}--\EqRatioEight{} lần (từ hơn một tới gần hai bậc độ lớn)
-là cái giá thật sự của khả năng xóa.
+\EqRatioFour{}--\EqRatioEight{} lần (từ hơn một tới gần hai bậc độ lớn) là
+đánh đổi dung lượng--FPR để có counter và khả năng xóa.
 
 \begin{table}[H]\centering
-\caption{E3 --- Cùng ngân sách \BudgetBytes{} byte, $n=\NKeys{}$,
+\caption{E3: Cùng payload \BudgetBytes{} byte, $n=\NKeys{}$,
 $k$ tối ưu cho từng cấu trúc}
 \label{tab:equalbudget}
 \input{tab/equal_budget.tex}
@@ -342,74 +377,86 @@ $k$ tối ưu cho từng cấu trúc}
 
 \begin{figure}[H]\centering
 \includegraphics[width=0.62\textwidth]{fig/equal_budget.png}
-\caption{FPR (thang log) khi cả ba cấu trúc dùng cùng một lượng byte.}
+\caption{FPR (thang log) khi cả ba mảng backing dùng cùng payload byte.}
 \label{fig:equalbudget}
 \end{figure}
 
-\subsection{False negative của CBF khi xóa}
-Thực nghiệm E4 (Bảng~\ref{tab:falseneg}) tái hiện kịch bản xóa sai trong
-thực tế: một hệ thống tin vào câu trả lời ``có'' của CBF và đem xóa
-\FnFpDeleted{} khóa \emph{chưa từng được chèn} (chúng là false positive tại
-$m/n=\FnRatio{}$); trong đó \FnPerformed{} lần xóa thực sự được thực hiện
---- số còn lại bị chính phép kiểm tra query trong \textsc{CBF-Delete} chặn
-lại, vì các lần xóa trước đó đã làm giảm counter liên quan. Mỗi lần xóa
-thành công giảm nhầm tới $k=\FnK{}$ counter đang được các phần tử thật dùng
-chung, kết quả \FnCount{} phần tử thật (\FnRate{}) biến mất khỏi bộ lọc --- false negative, loại lỗi phá vỡ bất
-biến ``không bỏ sót'' mà mọi ứng dụng của BF dựa vào. BF không thể mắc lỗi
-này vì không có thao tác xóa. Biện pháp thực dụng: xây lại (rebuild) bộ lọc
-định kỳ, hoặc chỉ xóa các khóa chắc chắn đã chèn (cần cấu trúc phụ trợ).
+\subsection{Contract của delete và stress test xóa sai}
+E4 (Bảng~\ref{tab:falseneg}) trước hết kiểm tra trường hợp dùng đúng: tại
+$m/n=\FnRatio{}$, counter lớn nhất sau insert chỉ là \FnMaxCounter{} nên không
+có overflow; sau khi xóa đúng \FnValidDeleted{} khóa, cả
+\FnValidRemaining{} khóa thật còn lại vẫn được Query nhận ra
+(\FnValidFalseNeg{} false negative).
+
+Phần hai cố ý vi phạm contract của delete: hệ thống nhầm câu trả lời ``có thể
+có'' là bằng chứng membership và thử xóa \FnFpDeleted{} khóa chưa từng được
+chèn. Dù dùng Query guard, \FnPerformed{} yêu cầu vẫn lọt qua vì chính các khóa
+này là false positive. Các lần giảm nhầm counter làm \FnCount{} phần tử thật
+(\FnRate{}) biến mất khỏi bộ lọc. Đây là kết quả có điều kiện của stress test
+với hàng nghìn yêu cầu xóa sai, \emph{không phải} FNR mặc định của CBF và không
+được tổng quát hóa sang workload dùng đúng. Biện pháp chính là chỉ xóa khóa
+được xác nhận từ nguồn dữ liệu chuẩn; rebuild giúp khôi phục nếu contract hoặc
+thông tin counter đã bị phá vỡ.
 
 \begin{table}[H]\centering
-\caption{E4 --- Xóa các khóa bị báo nhầm ``có'' gây false negative trong CBF}
+\caption{E4: Xóa đúng và stress test xóa sai trong CBF}
 \label{tab:falseneg}
+\small
 \input{tab/false_neg.tex}
 \end{table}
 
 \section{Các biến thể liên quan}
 \textbf{Blocked Bloom Filter}~\cite{putze2010}: gói toàn bộ $k$ bit của một
 khóa vào một block bằng đúng một cache line, giảm số cache miss mỗi truy vấn
-xuống $\sim$1, đổi lấy FPR tăng nhẹ; RocksDB dùng chiến lược này; không hỗ
-trợ xóa. \textbf{Cuckoo Filter}~\cite{cuckoo2014}: lưu fingerprint trong
+xuống $\sim$1, đổi lấy FPR tăng nhẹ; RocksDB dùng biến thể cache-line-local
+trong full filter~\cite{rocksdbBloom}; không hỗ trợ xóa.
+\textbf{Cuckoo Filter}~\cite{cuckoo2014}: lưu fingerprint trong
 bảng băm cuckoo, \emph{hỗ trợ xóa}, và cần ít không gian hơn cả BF tối ưu
 khi FPR mục tiêu $\varepsilon<3\%$; nhược điểm là chèn có thể thất bại khi
 hệ số tải vượt $\sim$95\%. \textbf{d-left CBF}~\cite{bonomi2006}: dùng
 d-left hashing + fingerprint, tiết kiệm khoảng một nửa không gian so với CBF
-4-bit --- lựa chọn thay thế CBF tốt trên phần cứng.
+4-bit. Đây là một lựa chọn thay thế CBF tốt trên phần cứng.
 
+\clearpage
 \section{Khuyến nghị lựa chọn}
 \begin{enumerate}
-  \item \textbf{Tập gần như tĩnh hoặc rebuild được định kỳ} (SSTable bất
-        biến, Cache Digest, chữ ký DPI ít đổi): dùng \textbf{BF}; chọn
-        $m=-n\ln p/(\ln 2)^2$ và $k=\mathrm{round}((m/n)\ln 2)$ theo FPR mục
+  \item \textbf{Tập tĩnh hoặc rebuild được}:\\
+        (SSTable bất biến, Cache Digest, chữ ký DPI ít đổi) dùng \textbf{BF}.\\
+        Chọn $m=-n\ln p/(\ln 2)^2$ và
+        $k=\mathrm{round}((m/n)\ln 2)$ theo FPR mục
         tiêu $p$ (ví dụ $p=1\%\Rightarrow m/n\approx 9.6$, $k=7$).
-  \item \textbf{Bắt buộc xóa động, FPR mục tiêu $\ge 3\%$} hoặc cần đếm bội:
-        dùng \textbf{CBF 4-bit} với counter bão hòa; lên lịch rebuild định
-        kỳ để triệt tích lũy false negative; nếu có thể, chỉ xóa khóa chắc
-        chắn đã chèn.
-  \item \textbf{Bắt buộc xóa, FPR mục tiêu $<3\%$}: cân nhắc \textbf{Cuckoo
-        Filter} (ít không gian hơn, lookup nhanh, có xóa) hoặc
-        \textbf{dlCBF} trên phần cứng; theo dõi hệ số tải.
+  \item \textbf{Cần xóa động hoặc đếm bội}:\\ dùng \textbf{CBF 4-bit} khi hệ
+        thống có nguồn sự thật để bảo đảm chỉ xóa khóa đã chèn. Theo dõi
+        overflow; rebuild từ nguồn chuẩn khi counter mất thông tin hoặc
+        contract delete có thể đã bị vi phạm.
+  \item \textbf{Cần xóa và bộ nhớ/FPR là ràng buộc chặt}: cân nhắc
+        \textbf{Cuckoo Filter}, đặc biệt khi FPR mục tiêu $<3\%$, hoặc
+        \textbf{dlCBF} trên phần cứng; theo dõi hệ số tải và thất bại insert.
   \item \textbf{Nghẽn vì cache miss}: chuyển sang \textbf{Blocked Bloom
         Filter}, chấp nhận FPR tăng nhẹ.
 \end{enumerate}
 
 \section{Kết luận}
 Thực nghiệm xác nhận bốn giả thuyết: FPR của BF/CBF trùng nhau và
-bám công thức lý thuyết (H1), CBF 4-bit tốn đúng $4\times$ bộ nhớ (H2), BF
-nhanh hơn CBF 4-bit ở mọi thao tác chung --- riêng CBF 8-bit bám sát BF ở
-query nhưng vẫn chậm hơn ở insert --- và CBF gánh thêm chi phí delete
-(H3), FPR giảm mũ theo $m/n$ với cực tiểu theo $k$ tại $k^*$ (H4). Bức tranh tổng thể:
-\emph{CBF không thay thế BF --- nó mua khả năng xóa bằng bộ nhớ gấp bốn và
-rủi ro false negative}. Do đó BF là mặc định đúng cho lọc dữ liệu tốc độ cao
-trên tập tĩnh; CBF chỉ dành cho tập biến động liên tục không thể rebuild;
-và khi cần xóa với yêu cầu FPR chặt, các cấu trúc thế hệ sau như Cuckoo
-Filter đáng được ưu tiên khảo sát.
+bám công thức lý thuyết trong sai số lấy mẫu (H1), payload CBF 4-bit bằng
+$4\times$ BF (H2), và trong cài đặt Python đang xét BF có median throughput
+cao hơn CBF 4-bit ở các thao tác chung (H3); FPR giảm mũ theo $m/n$ với cực
+tiểu theo $k$ tại $k^*$ (H4). Bức tranh tổng thể: \emph{CBF mua khả năng xóa
+bằng payload counter lớn hơn và một contract delete chặt hơn}. Khi chỉ xóa
+khóa chắc chắn đã chèn và không overflow, thí nghiệm không quan sát false
+negative; false negative xuất hiện trong stress test khi cố ý xóa các khóa
+vắng mặt. Do đó BF phù hợp với tập tĩnh/rebuild được; CBF phù hợp với tập động
+khi có nguồn sự thật cho delete; và Cuckoo Filter đáng khảo sát khi cần xóa
+với yêu cầu FPR/bộ nhớ chặt.
 
-\paragraph{Hạn chế.} Số đo thông lượng mang chi phí thông dịch của Python
-nên chỉ có ý nghĩa so sánh tương đối; công thức~(\ref{eq:fpr}) là xấp xỉ
-(và là cận dưới) --- với $m$ nhỏ nên đo thực nghiệm; phân tích giả định hàm
-băm lý tưởng, còn double hashing chỉ hợp lệ tiệm cận và trong môi trường đối
-kháng cần hàm băm có khóa.
+\paragraph{Hạn chế.} Benchmark dùng một hiện thực Python cụ thể; dù đã báo
+median/IQR qua \BenchRepeats{} lượt, cả số tuyệt đối lẫn tỉ số không đại diện
+cho mọi hiện thực C/C++/phần cứng. FPR dùng một tập khóa tất định và một cặp
+seed; KTC Wilson chỉ phản ánh sai số trên các truy vấn vắng mặt, chưa bao phủ
+biến thiên qua nhiều họ hash/seed. Công thức~(\ref{eq:fpr}) là xấp xỉ (và là
+cận dưới); với $m$ nhỏ nên đo thực nghiệm. Phân tích giả định hàm băm lý
+tưởng; double hashing chỉ hợp lệ tiệm cận và môi trường đối kháng cần hàm băm
+có khóa. Các số bộ nhớ chỉ là payload backing array, không phải RSS.
 
 \begin{thebibliography}{9}
 \bibitem{bloom1970} B.~H. Bloom, ``Space/time trade-offs in hash coding with
@@ -429,12 +476,15 @@ performance: Building a better Bloom filter,'' \emph{Random Structures \&
 Algorithms}, vol.~33, no.~2, pp.~187--218, 2008.
 \bibitem{bonomi2006} F.~Bonomi, M.~Mitzenmacher, R.~Panigrahy, S.~Singh, and
 G.~Varghese, ``An Improved Construction for Counting Bloom Filters,'' in
-\emph{Algorithms --- ESA 2006}, LNCS 4168, pp.~684--695.
+\emph{Algorithms: ESA 2006}, LNCS 4168, pp.~684--695.
 \bibitem{cuckoo2014} B.~Fan, D.~G. Andersen, M.~Kaminsky, and M.~D.
 Mitzenmacher, ``Cuckoo Filter: Practically Better Than Bloom,'' in
 \emph{Proc.\ 10th ACM CoNEXT}, pp.~75--88, 2014.
 \bibitem{dpi2003} S.~Dharmapurikar, P.~Krishnamurthy, T.~Sproull, and
 J.~Lockwood, ``Deep Packet Inspection using Parallel Bloom Filters,'' in
 \emph{IEEE Hot Interconnects 11}, 2003.
+\bibitem{rocksdbBloom} RocksDB,
+\href{https://github.com/facebook/rocksdb/wiki/RocksDB-Bloom-Filter}
+{``RocksDB Bloom Filter,''} project documentation, accessed Aug.~10, 2026.
 \end{thebibliography}
 \end{document}
