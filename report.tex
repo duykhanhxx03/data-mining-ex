@@ -50,14 +50,14 @@ positive), phân tích tràn counter, mã giả cho các thao tác insert/query/
 và một bộ thực nghiệm Python tự cài đặt cả hai cấu trúc. Kết quả trên
 $n=\NKeys{}$ khóa xác nhận: (i) tỉ lệ dương tính giả (FPR) thực nghiệm bám sát
 công thức $p=(1-e^{-kn/m})^k$ và khi dùng cùng bộ hàm băm, cùng $m$, $k$ thì BF
-và CBF cho kết quả truy vấn \emph{trùng nhau từng khóa}; (ii) payload của
-CBF 4-bit tốn đúng $4\times$ BF, do đó với cùng ngân sách byte, FPR của CBF
-(\EqFprCBFFour{}) cao hơn BF (\EqFprBF{}) khoảng \EqRatioFour{} lần,
-tức hơn một bậc độ lớn; (iii) CBF hỗ trợ
-xóa an toàn khi caller chỉ xóa khóa chắc chắn đã chèn: xóa đúng
+và CBF cho kết quả truy vấn \emph{trùng nhau từng khóa}; (ii) phần dữ liệu
+chính (payload) của CBF 4-bit tốn đúng $4\times$ BF, do đó với cùng ngân
+sách byte, FPR của CBF (\EqFprCBFFour{}) cao hơn BF (\EqFprBF{}) khoảng
+\EqRatioFour{} lần, tức hơn một bậc độ lớn; (iii) CBF hỗ trợ
+xóa an toàn khi bên gọi (caller) chỉ xóa khóa chắc chắn đã chèn: xóa đúng
 \FnValidDeleted{} khóa không làm mất khóa thật nào còn lại, trong khi stress
-test cố ý xóa các false positive tạo ra \FnCount{} false negative
-(\FnRate{}). Kết luận: dùng BF cho tập gần như tĩnh; dùng CBF khi cần xóa động
+test trên một bộ lọc riêng chứa đủ $n$ khóa, cố ý xóa các false positive,
+tạo ra \FnCount{} false negative (\FnRate{} của $n$). Kết luận: dùng BF cho tập gần như tĩnh; dùng CBF khi cần xóa động
 và hệ thống bảo đảm được contract của delete; khi cần xóa với FPR mục tiêu
 $<3\%$, Cuckoo Filter là lựa chọn đáng cân nhắc hơn.
 \end{abstract}
@@ -99,7 +99,7 @@ có thể tắt nhầm bit đang được phần tử khác dùng chung.
 CBF thay mỗi bit bằng một \emph{counter} $b$ bit (thường $b=4$), ký hiệu
 $C[i]$. \emph{Insert} tăng, \emph{Delete} giảm $k$ counter tương ứng;
 \emph{Query} trả ``có thể có'' khi mọi counter dương. Contract của Delete yêu
-cầu caller chỉ xóa khóa chắc chắn đã chèn: câu trả lời ``có thể có'' của Query
+cầu bên gọi (caller) chỉ xóa khóa chắc chắn đã chèn: câu trả lời ``có thể có'' của Query
 không chứng minh membership và không thể dùng làm điều kiện đủ để xóa. Khi
 contract này được tuân thủ và counter không mất thông tin do tràn, CBF không
 sinh false negative. Hai nguồn phá vỡ bảo đảm là \emph{tràn counter} khi hơn
@@ -138,13 +138,13 @@ $\mathrm{B}(nk,1/m)\approx\mathrm{Poisson}(\lambda)$ với $\lambda=kn/m=\ln 2$
 \end{equation}
 và Fan \emph{et al.} chặn trên toàn cục: với $k\le(\ln 2)m/n$,
 $\Pr[\max_i C[i]\ge 16]\le m\cdot 1.37\times10^{-15}$~\cite{fan2000}. Vì
-xác suất này ``minuscule'', counter 4 bit (đếm $0..15$) đủ cho hầu hết ứng
-dụng. CBF tốn $4\times$ payload so với BF cùng số ô~\cite{broder2004}.
+xác suất này vô cùng nhỏ (``minuscule''), counter 4 bit (đếm $0..15$) đủ cho
+hầu hết ứng dụng. CBF tốn $4\times$ payload so với BF cùng số ô~\cite{broder2004}.
 Nếu insert bão hòa ở 15 rồi delete vẫn giảm như counter thường, số lần tăng
 vượt ngưỡng đã bị mất và false negative có thể xuất hiện sau nhiều lần xóa.
 Chính sách ``sticky saturation'' (không bao giờ giảm ô đã bão hòa) tránh lỗi
 này nhưng đổi lại tạo false positive dai dẳng; do đó hệ thống thực tế cần
-theo dõi overflow hoặc rebuild từ nguồn dữ liệu chuẩn.
+theo dõi overflow hoặc rebuild từ nguồn dữ liệu chuẩn (source of truth).
 
 \paragraph{Hai hệ quả cho việc so sánh.}
 (1)~Với \emph{cùng} $m$, $k$ và cùng bộ hàm băm, một ô của CBF dương khi và
@@ -239,14 +239,14 @@ chung sơ đồ double hashing Kirsch--Mitzenmacher
 $g_i(x)=(h_1(x)+i\,h_2(x)) \bmod m$ với $h_1,h_2$ là MurmurHash3 hai seed
 khác nhau~\cite{kirsch2008}, nhờ đó BF và CBF thăm \emph{cùng các vị trí} với
 mỗi khóa, qua đó cô lập đúng biến số cần so sánh. Delete chuẩn giả định caller
-biết khóa đã chèn và không thêm Query; riêng E4 dùng một hàm có Query guard để
+biết khóa đã chèn và không thêm Query; riêng E4 dùng một hàm có bước kiểm tra Query trước khi xóa (Query guard) để
 chứng minh guard này vẫn không ngăn được xóa sai khi gặp false positive.
 
 \paragraph{Dữ liệu và tham số.} $n=\NKeys{}$ khóa ``có mặt''
 (\texttt{P000000000}\dots) được chèn và $n'=\NKeys{}$ khóa ``vắng mặt''
 (\texttt{A000000000}\dots) dùng đo FPR; sinh tất định để tái lập được. Tỉ lệ
 $m/n\in\{4,6,8,10,12,16\}$; $k=\mathrm{round}((m/n)\ln 2)$ trừ khi quét $k$.
-FPR được báo cùng khoảng tin cậy Wilson 95\%. Các phép đo throughput lặp
+FPR được báo cùng khoảng tin cậy (KTC) Wilson 95\%. Các phép đo throughput lặp
 \BenchRepeats{} lượt, dùng median làm giá trị trung tâm và IQR làm độ phân tán;
 insert/delete dùng filter mới ở mỗi lượt để bảo đảm trạng thái đầu vào giống
 nhau.
@@ -254,7 +254,8 @@ nhau.
 \paragraph{Bốn thực nghiệm.}
 \begin{itemize}
   \item[\textbf{E1}] FPR thực nghiệm vs.\ lý thuyết (kèm KTC 95\%) và
-        throughput median/IQR của insert/query/delete theo $m/n$.
+        median/IQR throughput của các thao tác insert, query, delete
+        theo $m/n$.
   \item[\textbf{E2}] FPR theo $k\in\{1,\dots,12\}$ tại $m/n=10$ để kiểm chứng
         $k^*=(m/n)\ln 2$.
   \item[\textbf{E3}] Cố định payload \BudgetBytes{} byte, so đánh đổi FPR của
@@ -267,7 +268,8 @@ nhau.
 \textbf{H1}: FPR thực nghiệm của BF và CBF (cùng $m,k$) trùng nhau và gần
 đường lý thuyết trong sai số lấy mẫu. \textbf{H2}: payload CBF 4-bit
 $=4\times$ BF (8-bit $=8\times$). \textbf{H3}: trong cài đặt Python đang xét,
-throughput BF $\ge$ CBF cho các thao tác chung.
+throughput BF $\ge$ CBF 4-bit cho các thao tác chung (CBF 8-bit có thể bám
+sát BF ở query trong biên độ nhiễu).
 \textbf{H4}: FPR giảm mũ theo $m/n$; cực tiểu theo $k$ đạt quanh $k^*$.
 
 \section{Kết quả và thảo luận}
@@ -345,9 +347,9 @@ Với query trên khóa vắng mặt, BF đạt \QmissBFTen{} nghìn thao tác/s
 Delete chuẩn của CBF 4-bit đạt \DelCBFTen{} nghìn thao tác/s; phép đo giả định
 caller biết khóa đã chèn và không cộng thêm một lượt Query. Mỗi điểm là median
 của \BenchRepeats{} lượt, dải tô trên Hình~\ref{fig:throughput} là IQR. Các số
-và tỉ số phản ánh cụ thể hiện thực \texttt{bitarray}/\texttt{bytearray}, thao
-tác nibble và vòng lặp Python; chúng không chứng minh mọi cài đặt BF luôn nhanh
-hơn mọi cài đặt CBF.
+và tỉ số phản ánh bản cài đặt cụ thể dùng \texttt{bitarray}/\texttt{bytearray},
+thao tác nibble và vòng lặp Python; chúng không chứng minh mọi cài đặt BF luôn
+nhanh hơn mọi cài đặt CBF.
 
 \begin{figure}[H]\centering
 \includegraphics[width=\textwidth]{fig/throughput.png}
@@ -388,13 +390,14 @@ có overflow; sau khi xóa đúng \FnValidDeleted{} khóa, cả
 \FnValidRemaining{} khóa thật còn lại vẫn được Query nhận ra
 (\FnValidFalseNeg{} false negative).
 
-Phần hai cố ý vi phạm contract của delete: hệ thống nhầm câu trả lời ``có thể
+Phần hai dùng một bộ lọc riêng đã chèn đủ $n=\NKeys{}$ khóa (chưa xóa khóa
+nào) và cố ý vi phạm contract của delete: hệ thống nhầm câu trả lời ``có thể
 có'' là bằng chứng membership và thử xóa \FnFpDeleted{} khóa chưa từng được
 chèn. Dù dùng Query guard, \FnPerformed{} yêu cầu vẫn lọt qua vì chính các khóa
 này là false positive. Các lần giảm nhầm counter làm \FnCount{} phần tử thật
-(\FnRate{}) biến mất khỏi bộ lọc. Đây là kết quả có điều kiện của stress test
-với hàng nghìn yêu cầu xóa sai, \emph{không phải} FNR mặc định của CBF và không
-được tổng quát hóa sang workload dùng đúng. Biện pháp chính là chỉ xóa khóa
+(\FnRate{} của $n$) biến mất khỏi bộ lọc. Đây là kết quả có điều kiện của
+stress test với hàng nghìn yêu cầu xóa sai, \emph{không phải} tỉ lệ false
+negative mặc định của CBF và không được tổng quát hóa sang workload dùng đúng. Biện pháp chính là chỉ xóa khóa
 được xác nhận từ nguồn dữ liệu chuẩn; rebuild giúp khôi phục nếu contract hoặc
 thông tin counter đã bị phá vỡ.
 
@@ -413,11 +416,10 @@ trong full filter~\cite{rocksdbBloom}; không hỗ trợ xóa.
 \textbf{Cuckoo Filter}~\cite{cuckoo2014}: lưu fingerprint trong
 bảng băm cuckoo, \emph{hỗ trợ xóa}, và cần ít không gian hơn cả BF tối ưu
 khi FPR mục tiêu $\varepsilon<3\%$; nhược điểm là chèn có thể thất bại khi
-hệ số tải vượt $\sim$95\%. \textbf{d-left CBF}~\cite{bonomi2006}: dùng
+hệ số tải vượt $\sim$95\%. \textbf{d-left CBF} (dlCBF)~\cite{bonomi2006}: dùng
 d-left hashing + fingerprint, tiết kiệm khoảng một nửa không gian so với CBF
 4-bit. Đây là một lựa chọn thay thế CBF tốt trên phần cứng.
 
-\clearpage
 \section{Khuyến nghị lựa chọn}
 \begin{enumerate}
   \item \textbf{Tập tĩnh hoặc rebuild được}:\\
@@ -426,8 +428,8 @@ d-left hashing + fingerprint, tiết kiệm khoảng một nửa không gian so 
         $k=\mathrm{round}((m/n)\ln 2)$ theo FPR mục
         tiêu $p$ (ví dụ $p=1\%\Rightarrow m/n\approx 9.6$, $k=7$).
   \item \textbf{Cần xóa động hoặc đếm bội}:\\ dùng \textbf{CBF 4-bit} khi hệ
-        thống có nguồn sự thật để bảo đảm chỉ xóa khóa đã chèn. Theo dõi
-        overflow; rebuild từ nguồn chuẩn khi counter mất thông tin hoặc
+        thống có nguồn dữ liệu chuẩn để bảo đảm chỉ xóa khóa đã chèn. Theo dõi
+        overflow; rebuild từ nguồn dữ liệu chuẩn khi counter mất thông tin hoặc
         contract delete có thể đã bị vi phạm.
   \item \textbf{Cần xóa và bộ nhớ/FPR là ràng buộc chặt}: cân nhắc
         \textbf{Cuckoo Filter}, đặc biệt khi FPR mục tiêu $<3\%$, hoặc
@@ -446,17 +448,17 @@ bằng payload counter lớn hơn và một contract delete chặt hơn}. Khi ch
 khóa chắc chắn đã chèn và không overflow, thí nghiệm không quan sát false
 negative; false negative xuất hiện trong stress test khi cố ý xóa các khóa
 vắng mặt. Do đó BF phù hợp với tập tĩnh/rebuild được; CBF phù hợp với tập động
-khi có nguồn sự thật cho delete; và Cuckoo Filter đáng khảo sát khi cần xóa
+khi có nguồn dữ liệu chuẩn cho delete; và Cuckoo Filter đáng khảo sát khi cần xóa
 với yêu cầu FPR/bộ nhớ chặt.
 
-\paragraph{Hạn chế.} Benchmark dùng một hiện thực Python cụ thể; dù đã báo
+\paragraph{Hạn chế.} Benchmark dùng một bản cài đặt Python cụ thể; dù đã báo
 median/IQR qua \BenchRepeats{} lượt, cả số tuyệt đối lẫn tỉ số không đại diện
-cho mọi hiện thực C/C++/phần cứng. FPR dùng một tập khóa tất định và một cặp
+cho mọi bản cài đặt C/C++/phần cứng. FPR dùng một tập khóa tất định và một cặp
 seed; KTC Wilson chỉ phản ánh sai số trên các truy vấn vắng mặt, chưa bao phủ
 biến thiên qua nhiều họ hash/seed. Công thức~(\ref{eq:fpr}) là xấp xỉ (và là
 cận dưới); với $m$ nhỏ nên đo thực nghiệm. Phân tích giả định hàm băm lý
 tưởng; double hashing chỉ hợp lệ tiệm cận và môi trường đối kháng cần hàm băm
-có khóa. Các số bộ nhớ chỉ là payload backing array, không phải RSS.
+có khóa. Các số bộ nhớ chỉ là payload của mảng backing, không phải RSS.
 
 \begin{thebibliography}{9}
 \bibitem{bloom1970} B.~H. Bloom, ``Space/time trade-offs in hash coding with
